@@ -1,8 +1,7 @@
-load definitionfile CdTe-base.def
+load definitionfile CIGS_graded_outdoor.def
 load spectrumfile AM1_5G 1 sun.spe
 action light
 action iv.checkaction
 calculate
-get iv xy
-save results.iv simu.iv
+save results.iv simulation.iv
 set quitscript.quitSCAPS
