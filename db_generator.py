@@ -1,16 +1,24 @@
 import subprocess
 import os
+from dotenv import load_dotenv
 import shutil
 
-SCAPS_PATH = r"C:\Scaps3312\scaps3312.exe"
-SCRIPT_PATH = os.path.abspath(r".\scripts")
-SCRIPT_NAME = "iv_curve_generation.script"
-BASELINE_PATH = os.path.abspath(r".\baseline\CIGS_graded_outdoor.def")
-BASELINE_NAME = "CIGS_graded_outdoor.def"
-DEF_PATH = r"C:\Scaps3312\def"
-CSV_PATH = os.path.abspath(r".\csv\iv_curve.csv")
-SIMULATION_NAME = "simulation.iv"
-RESULTS_PATH = r"C:\Scaps3312\results"
+load_dotenv()
+
+# chemin scaps :
+SCAPS_PATH = os.getenv("SCAPS_EXE_PATH")
+DEF_PATH = os.getenv("SCAPS_DEF_DIR")
+RESULTS_PATH = os.getenv("SCAPS_RESULTS_DIR")
+
+# chemin relatif :
+SCRIPT_PATH = os.path.abspath(os.getenv("SCRIPTS_DIR"))
+SCRIPT_NAME = os.getenv("SCRIPT_NAME")
+BASELINE_DIR = os.path.abspath(os.getenv("BASELINE_DIR"))
+BASELINE_NAME = os.getenv("BASELINE_FILENAME")
+BASELINE_PATH = os.path.join(BASELINE_DIR, BASELINE_NAME)
+CSV_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_PATH"))
+SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
+
 
 os.makedirs(SCRIPT_PATH, exist_ok=True)
 os.makedirs(os.path.dirname(BASELINE_PATH), exist_ok=True)
