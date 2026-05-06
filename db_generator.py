@@ -1,4 +1,4 @@
-from scaps_simulation import run, BASELINE_NAME, SIMULATION_NAME, BASELINE_PATH, DEF_PATH
+from scaps_simulation import run
 
 def generate_batch() :
     pass

@@ -17,12 +17,14 @@ BASELINE_DIR = os.path.abspath(os.getenv("BASELINE_DIR"))
 BASELINE_NAME = os.getenv("BASELINE_FILENAME")
 BASELINE_PATH = os.path.join(BASELINE_DIR, BASELINE_NAME)
 CSV_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_PATH"))
+V_CSV_PATH = os.path.abspath(os.getenv("V_CSV_PATH"))
 SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
 
 
 os.makedirs(SCRIPT_PATH, exist_ok=True)
 os.makedirs(os.path.dirname(BASELINE_PATH), exist_ok=True)
 os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
+os.makedirs(os.path.dirname(V_CSV_PATH), exist_ok=True)
 
 
 def run_scaps_simulation(baseline, simulation_name, script_path = SCRIPT_PATH, script_name = SCRIPT_NAME):
@@ -79,17 +81,24 @@ def baseline_scaps_extraction(file_path):
         print(f"Le fichier {file_path} n'existe pas.")
 
 
-def get_iv_file_content(iv_file_path):
+def get_iv_file_content(iv_file_path, v_path_file = None, save_v = False):
     """
     récupère les informations d'un fichier .iv généré par scaps et les écrit dans un fichier .csv
     :param iv_file_path: chemin vers le fichier .iv à lire
+    :param v_path_file: chemin vers le fichier .v à lire
+    :param save_v: booléen indiquant si les valeurs de tension doivent être sauvegardées dans v_path_file
     """
+    
     valuable_information_1 = False
     valuable_information_2 = False
+    
     csv_data = []
+    v_data = []
+    
     with open(iv_file_path, 'r', encoding='utf-8') as file:
         for line in file:
             clean_line = line.strip()
+            
             if clean_line.startswith("v(V)") and "jtot(mA/cm2)" in clean_line:
                 valuable_information_1 = True
                 continue
@@ -99,26 +108,37 @@ def get_iv_file_content(iv_file_path):
             elif valuable_information_1 and clean_line.split() and not valuable_information_2:
                 iv_point = clean_line.split()
                 csv_data.append(iv_point[0])
-                csv_data.append(iv_point[1])
+                if save_v and v_path_file is not None:
+                    v_data.append(iv_point[1])
             elif valuable_information_2 and clean_line.split() :
                 iv_info = clean_line.split()
                 csv_data.append(iv_info[2])
-    csv_line = ",".join(csv_data)
-    csv_line += "\n"
+    
+    # enregistrement d'une mesure IV
+    csv_iv_line = ",".join(csv_data)
+    csv_iv_line += "\n"       
     with open(CSV_PATH, 'a') as f :
-        f.write(csv_line)
+        f.write(csv_iv_line)
+    
+    # enregistrement de la tension dans un fichier séparé pour éviter la redondance : 
+    if save_v and v_path_file is not None:
+        print(f"Nombre de points IV + 6 paramètres: {len(csv_data)}, Nombre de tensions : {len(v_data)}")
+        csv_v_line = ",".join(v_data)
+        with open(v_path_file, 'w') as f:
+            f.write(csv_v_line)
 
-def run(baseline, simulation_name, source, destination):
+def run(save_v = False):
     """
     exécute la simulation de scaps en utilisant le fichier .def de base, puis copie le fichier .def à tester dans le dossier def de scaps, exécute la simulation de scaps à nouveau, puis supprime le fichier .def à tester du dossier def de scaps
-    :param baseline: chemin vers le fichier .def de base à utiliser pour la première simulation
-    :param simulation_name: nom du fichier de résultat de la simulation
-    :param source: chemin vers le fichier .def à copier
-    :param destination: chemin vers le dossier def de scaps 
+    :param save_v: booléen indiquant si les valeurs de tension doivent être sauvegardées dans un fichier séparé pour éviter la redondance dans le fichier iv_curve.csv
     """
-    baseline_scaps_insertion(source, destination)
-    run_scaps_simulation(baseline, simulation_name)
+    destination = os.path.join(DEF_PATH, BASELINE_NAME)
+    baseline_scaps_insertion(BASELINE_PATH, destination)
+    run_scaps_simulation(BASELINE_NAME, SIMULATION_NAME)
     baseline_scaps_extraction(destination)
-    get_iv_file_content(os.path.join(RESULTS_PATH, simulation_name))
+    if save_v:
+        get_iv_file_content(os.path.join(RESULTS_PATH, SIMULATION_NAME), v_path_file = V_CSV_PATH, save_v = True)
+    else:
+        get_iv_file_content(os.path.join(RESULTS_PATH, SIMULATION_NAME))
 
-# run(BASELINE_NAME, SIMULATION_NAME, BASELINE_PATH, os.path.join(DEF_PATH, BASELINE_NAME))
+run()
