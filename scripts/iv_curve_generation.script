@@ -2,6 +2,7 @@ load definitionfile CIGS_graded_outdoor.def
 load spectrumfile AM1_5G 1 sun.spe
 action light
 action iv.checkaction
+set interface1.IFdefect1.Ntotal 5.000e+15
 calculate
 save results.iv simulation.iv
 set quitscript.quitSCAPS

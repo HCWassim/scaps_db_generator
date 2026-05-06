@@ -27,19 +27,24 @@ os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
 os.makedirs(os.path.dirname(V_CSV_PATH), exist_ok=True)
 
 
-def run_scaps_simulation(baseline, simulation_name, script_path = SCRIPT_PATH, script_name = SCRIPT_NAME):
+def run_scaps_simulation(default_density, baseline, simulation_name, script_path = SCRIPT_PATH, script_name = SCRIPT_NAME):
     """
     exécute la simulation de scaps en utilisant le script généré
+    :param default_density: densité de défauts par défaut
     :param baseline: chemin vers le fichier .def à utiliser pour la simulation
     :param simulation_name: nom du fichier de résultat de la simulation
     :param script_path: chemin vers le dossier où le script sera créé
     :param script_name: nom du fichier script
     """
+
+    print(f"default_density: {default_density}")
+
     script_content = (
         f'load definitionfile {baseline}\n'
         f'load spectrumfile AM1_5G 1 sun.spe\n'
         f'action light\n'
         f'action iv.checkaction\n'
+        f'set interface1.IFdefect1.Ntotal {default_density}\n'
         f'calculate\n'
         f'save results.iv {simulation_name}\n'
         f'set quitscript.quitSCAPS\n'
@@ -127,18 +132,25 @@ def get_iv_file_content(iv_file_path, v_path_file = None, save_v = False):
         with open(v_path_file, 'w') as f:
             f.write(csv_v_line)
 
-def run(save_v = False):
-    """
-    exécute la simulation de scaps en utilisant le fichier .def de base, puis copie le fichier .def à tester dans le dossier def de scaps, exécute la simulation de scaps à nouveau, puis supprime le fichier .def à tester du dossier def de scaps
-    :param save_v: booléen indiquant si les valeurs de tension doivent être sauvegardées dans un fichier séparé pour éviter la redondance dans le fichier iv_curve.csv
-    """
+
+def preparation_simulation():
     destination = os.path.join(DEF_PATH, BASELINE_NAME)
     baseline_scaps_insertion(BASELINE_PATH, destination)
-    run_scaps_simulation(BASELINE_NAME, SIMULATION_NAME)
+
+
+def post_simulation_cleanup():
+    destination = os.path.join(DEF_PATH, BASELINE_NAME)
     baseline_scaps_extraction(destination)
+
+
+def run(default_density = 5e14, save_v = False):
+    """
+    exécute la simulation de scaps en utilisant le fichier .def de base, puis copie le fichier .def à tester dans le dossier def de scaps, exécute la simulation de scaps à nouveau, puis supprime le fichier .def à tester du dossier def de scaps
+    :param default_density: densité de défauts par défaut
+    :param save_v: booléen indiquant si les valeurs de tension doivent être sauvegardées dans un fichier séparé pour éviter la redondance dans le fichier iv_curve.csv
+    """
+    run_scaps_simulation(default_density, BASELINE_NAME, SIMULATION_NAME)
     if save_v:
         get_iv_file_content(os.path.join(RESULTS_PATH, SIMULATION_NAME), v_path_file = V_CSV_PATH, save_v = True)
     else:
         get_iv_file_content(os.path.join(RESULTS_PATH, SIMULATION_NAME))
-
-run()
