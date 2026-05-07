@@ -27,14 +27,13 @@ os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
 os.makedirs(os.path.dirname(V_CSV_PATH), exist_ok=True)
 
 
-def run_scaps_simulation(default_density, baseline, simulation_name, script_path = SCRIPT_PATH, script_name = SCRIPT_NAME):
+def run_scaps_simulation(default_density, baseline, simulation_name, script_path = SCRIPT_PATH):
     """
     exécute la simulation de scaps en utilisant le script généré
     :param default_density: densité de défauts par défaut
     :param baseline: chemin vers le fichier .def à utiliser pour la simulation
     :param simulation_name: nom du fichier de résultat de la simulation
     :param script_path: chemin vers le dossier où le script sera créé
-    :param script_name: nom du fichier script
     """
 
     print(f"default_density: {default_density}")
@@ -50,7 +49,11 @@ def run_scaps_simulation(default_density, baseline, simulation_name, script_path
         f'set quitscript.quitSCAPS\n'
     )
 
+    script_name = f"{SCRIPT_NAME}_{default_density}.script"
     full_script_path = os.path.join(script_path, script_name)
+
+    print(full_script_path)
+
     with open(full_script_path, 'w') as script_file:
         script_file.write(script_content)
 
@@ -61,6 +64,11 @@ def run_scaps_simulation(default_density, baseline, simulation_name, script_path
         print("Simulation terminée")
     except subprocess.CalledProcessError:
         pass
+
+    if os.path.isfile(full_script_path):
+        os.remove(full_script_path)
+    else:
+        print(f"Le script {full_script_path} n'existe pas et ne peut pas être supprimé.")
 
 
 def baseline_scaps_insertion(source, destination):
@@ -121,9 +129,10 @@ def get_iv_file_content(iv_file_path, v_path_file = None, save_v = False):
     
     # enregistrement d'une mesure IV
     csv_iv_line = ",".join(csv_data)
-    csv_iv_line += "\n"       
-    with open(CSV_PATH, 'a') as f :
-        f.write(csv_iv_line)
+    csv_iv_line += "\n"
+    return csv_iv_line
+    # with open(CSV_PATH, 'a') as f :
+    #     f.write(csv_iv_line)
     
     # enregistrement de la tension dans un fichier séparé pour éviter la redondance : 
     if save_v and v_path_file is not None:
@@ -149,8 +158,17 @@ def run(default_density = 5e14, save_v = False):
     :param default_density: densité de défauts par défaut
     :param save_v: booléen indiquant si les valeurs de tension doivent être sauvegardées dans un fichier séparé pour éviter la redondance dans le fichier iv_curve.csv
     """
-    run_scaps_simulation(default_density, BASELINE_NAME, SIMULATION_NAME)
+    simulation_name = f"{SIMULATION_NAME}_{default_density}.iv"
+    run_scaps_simulation(default_density, BASELINE_NAME, simulation_name)
     if save_v:
-        get_iv_file_content(os.path.join(RESULTS_PATH, SIMULATION_NAME), v_path_file = V_CSV_PATH, save_v = True)
+        result_line = get_iv_file_content(os.path.join(RESULTS_PATH, simulation_name), v_path_file = V_CSV_PATH, save_v = True)
     else:
-        get_iv_file_content(os.path.join(RESULTS_PATH, SIMULATION_NAME))
+        result_line = get_iv_file_content(os.path.join(RESULTS_PATH, simulation_name))
+    
+    # nettoyage iv file :
+    if os.path.isfile(os.path.join(RESULTS_PATH, simulation_name)):
+        os.remove(os.path.join(RESULTS_PATH, simulation_name))
+    else :
+        print(f"Le fichier {os.path.join(RESULTS_PATH, simulation_name)} n'existe pas et ne peut pas être supprimé.")
+
+    return result_line
