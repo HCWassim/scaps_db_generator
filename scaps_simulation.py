@@ -2,23 +2,24 @@ import subprocess
 import os
 from dotenv import load_dotenv
 import shutil
+from config import SCAPS_PATH, DEF_PATH, RESULTS_PATH, SCRIPT_PATH, SCRIPT_NAME, BASELINE_DIR, BASELINE_NAME, BASELINE_PATH, CSV_PATH, V_CSV_PATH, SIMULATION_NAME
 
 load_dotenv()
 
-# chemin scaps :
-SCAPS_PATH = os.getenv("SCAPS_EXE_PATH")
-DEF_PATH = os.getenv("SCAPS_DEF_DIR")
-RESULTS_PATH = os.getenv("SCAPS_RESULTS_DIR")
+# # chemin scaps :
+# SCAPS_PATH = os.getenv("SCAPS_EXE_PATH")
+# DEF_PATH = os.getenv("SCAPS_DEF_DIR")
+# RESULTS_PATH = os.getenv("SCAPS_RESULTS_DIR")
 
-# chemin relatif :
-SCRIPT_PATH = os.path.abspath(os.getenv("SCRIPTS_DIR"))
-SCRIPT_NAME = os.getenv("SCRIPT_NAME")
-BASELINE_DIR = os.path.abspath(os.getenv("BASELINE_DIR"))
-BASELINE_NAME = os.getenv("BASELINE_FILENAME")
-BASELINE_PATH = os.path.join(BASELINE_DIR, BASELINE_NAME)
-CSV_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_PATH"))
-V_CSV_PATH = os.path.abspath(os.getenv("V_CSV_PATH"))
-SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
+# # chemin relatif :
+# SCRIPT_PATH = os.path.abspath(os.getenv("SCRIPTS_DIR"))
+# SCRIPT_NAME = os.getenv("SCRIPT_NAME")
+# BASELINE_DIR = os.path.abspath(os.getenv("BASELINE_DIR"))
+# BASELINE_NAME = os.getenv("BASELINE_FILENAME")
+# BASELINE_PATH = os.path.join(BASELINE_DIR, BASELINE_NAME)
+# CSV_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_PATH"))
+# V_CSV_PATH = os.path.abspath(os.getenv("V_CSV_PATH"))
+# SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
 
 
 os.makedirs(SCRIPT_PATH, exist_ok=True)
@@ -87,7 +88,7 @@ def baseline_scaps_insertion(source, destination):
     shutil.copy2(source, destination)
 
 
-def baseline_scaps_extraction(file_path):
+def delete_file(file_path):
     """
     supprime le fichier .def qui a été collé dans le dossier def de scaps après l'avoir utilisé pour la simulation
     :param file_path: chemin vers le fichier .def à supprimer 
@@ -144,7 +145,7 @@ def preparation_simulation():
 
 def post_simulation_cleanup():
     destination = os.path.join(DEF_PATH, BASELINE_NAME)
-    baseline_scaps_extraction(destination)
+    delete_file(destination)
 
 
 def run(default_density_surface = 5e14, default_density_volume = 5e15, thickness = 1.5e-2, save_v = False):

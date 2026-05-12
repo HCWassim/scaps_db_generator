@@ -1,20 +1,10 @@
+import time
 import itertools
 import multiprocessing
-from scaps_simulation import run, preparation_simulation, post_simulation_cleanup, CSV_PATH
+from scaps_simulation import run, preparation_simulation, post_simulation_cleanup
+from config import DEFAULT_DENSITY_SURFACE_FROM, DEFAULT_DENSITY_SURFACE_TO, DEFAULT_DENSITY_SURFACE_STEPS, DEFAULT_DENSITY_VOLUME_FROM, DEFAULT_DENSITY_VOLUME_TO, DEFAULT_DENSITY_VOLUME_STEPS, THICKNESS_FROM, THICKNESS_TO, THICKNESS_STEPS
+from config import CSV_PATH
 
-
-# plage de variation des paramètres physiques de la celulle solaire :
-DEFAULT_DENSITY_SURFACE_FROM = 5e14
-DEFAULT_DENSITY_SURFACE_TO = 5e15
-DEFAULT_DENSITY_SURFACE_STEPS = 10
-
-DEFAULT_DENSITY_VOLUME_FROM = 5e15
-DEFAULT_DENSITY_VOLUME_TO = 5e17
-DEFAULT_DENSITY_VOLUME_STEPS = 10
-
-THICKNESS_FROM = 1.5E-2
-THICKNESS_TO = 1.5E-1
-THICKNESS_STEPS = 10
 
 def generate_batch_values(from_val, to_val, steps) :
     """
@@ -46,9 +36,14 @@ if __name__ == "__main__":
     preparation_simulation()
     parameters = generate_batch()
 
+    start_time = time.time()
     print("Lancement du batch de simulations...")
+
     with multiprocessing.Pool() as pool:
         results = pool.map(run_and_return, parameters)
+
+    end_time = time.time()
+    print(f"Temps de traitement : {end_time - start_time:.2f} secondes")
 
     # Écriture CSV séquentielle, dans l'ordre, sans race condition
     results.sort(key=lambda x: float(x[0]))  # tri par densité

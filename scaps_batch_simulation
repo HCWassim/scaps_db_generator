@@ -1,0 +1,185 @@
+import re
+import os
+import subprocess
+from config import SCRIPT_NAME, SCAPS_PATH, SCRIPT_PATH, BASELINE_NAME, BATCH_PATH, BATCH_PARAMETERS, RESULTS_PATH, CSV_PATH
+from scaps_simulation import preparation_simulation, post_simulation_cleanup, delete_file
+
+def generate_sbf_file(parameters, batch_name):
+    header = "batch display mode = not suppressed\n"
+    blocks = [
+        f"\n"
+        f"Batch parameter {i} :\n"
+        f"Label 1 : {param['label1']}\n"
+        f"Label 2 : {param['label2']}\n"
+        f"Label 3 : {param['label3']}\n"
+        f"Label 4 : {param['label4']}\n"
+        f"simultaneous :  0\n"
+        f"values from a list :  0\n"
+        f"logarithmic variation :  0\n"
+        f"startvalue :   {param['startvalue']}\n"
+        f"stopvalue :   {param['stopvalue']}\n"
+        f"number of steps :   {param['steps']}\n"
+        for i, param in enumerate(parameters)
+    ]
+    script_content = header + "".join(blocks) + "\n"
+    batch_file_name = f"{batch_name}.sbf"
+    full_batch_file_path = os.path.join(BATCH_PATH, batch_file_name)
+    with open(full_batch_file_path, 'w') as batch_file:
+        batch_file.write(script_content)
+    if os.path.isfile(full_batch_file_path):
+        return True
+    else:
+        return False
+
+
+def run_scaps_batch_simulation(simulation_name, batch_name):
+    """
+    exécute la simulation de scaps en utilisant le script généré
+    :param simulation_name: nom du fichier de résultat de la simulation
+    """
+
+    script_content = (
+        # chargement des fichiers pour la simulation
+        f'load definitionfile {BASELINE_NAME}\n'
+        f'load spectrumfile AM1_5G 1 sun.spe\n'
+        f'load batchsettingsfile {batch_name}.sbf\n'
+        
+        # mise en place des settings
+        f'action light\n'
+        f'action iv.checkaction\n'        
+        
+        # obtention des résultats
+        f'calculate batch\n'
+        # f'get iv uv\n'
+
+        f'save results.iv batch_{simulation_name}.iv\n'
+        f'set quitscript.quitSCAPS\n'
+    )
+
+    script_name = f"{SCRIPT_NAME}_batch.script"
+    full_script_path = os.path.join(SCRIPT_PATH, script_name)
+
+    print(full_script_path)
+
+    with open(full_script_path, 'w') as script_file:
+        script_file.write(script_content)
+
+    try:
+        print(f"Exécution de SCAPS avec le script : {full_script_path}")
+        SCAPS_DIR = os.path.dirname(SCAPS_PATH)
+        subprocess.run([SCAPS_PATH, full_script_path], cwd=SCAPS_DIR, check=True)
+        print("Simulation terminée")
+    except subprocess.CalledProcessError:
+        pass
+
+    if os.path.isfile(full_script_path):
+        os.remove(full_script_path)
+    else:
+        print(f"Le script {full_script_path} n'existe pas et ne peut pas être supprimé.")
+
+
+def parse_iv_file(filepath: str) -> list[list[str]]:
+    """
+    Parse a SCAPS .iv batch file.
+ 
+    Returns a list of rows, one per simulation. Each row is:
+        [v0, v1, ..., vN, Voc, Jsc, FF, eta, V_MPP, J_MPP]
+    """
+    # Patterns
+    # Data lines: first column is voltage (leading whitespace + number), columns are tab-separated
+    voltage_re = re.compile(
+        r'^\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'   # v(V) — first column
+        r'[\t ]+'                                 # tab or space separator
+        r'(-?\d+\.\d+(?:[eE][+-]?\d+)?)'         # jtot  — second column (ignored in output)
+    )
+    # Parameters are tab-separated: "Voc =\t    0.765559\tVolt"
+    param_re = {
+        'Voc':   re.compile(r'^Voc\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+        'Jsc':   re.compile(r'^Jsc\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+        'FF':    re.compile(r'^FF\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+        'eta':   re.compile(r'^eta\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+        'V_MPP': re.compile(r'^V_MPP\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+        'J_MPP': re.compile(r'^J_MPP\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+    }
+    header_re = re.compile(r'^\s*v\(V\)[\t ]')
+ 
+    results = []
+ 
+    current_voltages: list[str] = []
+    current_params: dict[str, str] = {}
+    in_iv_table = False
+ 
+    def flush():
+        """Save current simulation if complete."""
+        if current_voltages and len(current_params) == 6:
+            row = current_voltages + [
+                current_params['Voc'],
+                current_params['Jsc'],
+                current_params['FF'],
+                current_params['eta'],
+                current_params['V_MPP'],
+                current_params['J_MPP'],
+            ]
+            results.append(row)
+ 
+    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        for line in f:
+            stripped = line.strip()
+ 
+            # Detect start of IV table header → reset for a new simulation
+            if header_re.match(line):
+                # Flush previous simulation if any
+                if current_voltages or current_params:
+                    flush()
+                current_voltages = []
+                current_params = {}
+                in_iv_table = True
+                continue
+ 
+            # Collect voltage points inside IV table
+            if in_iv_table:
+                # Skip blank lines (file has a blank line right after the header)
+                if stripped == '':
+                    continue
+                m = voltage_re.match(line)
+                if m:
+                    current_voltages.append(m.group(1))
+                    continue
+                else:
+                    # Non-data, non-blank line ends the IV table
+                    in_iv_table = False
+ 
+            # Collect solar cell parameters (can appear anywhere after the table)
+            for key, pattern in param_re.items():
+                m = pattern.match(stripped)
+                if m:
+                    current_params[key] = m.group(1)
+                    break
+ 
+    # Flush last simulation
+    flush()
+    return results
+
+
+def run_batch(simulation_name, batch_name):
+    generate_sbf_file(BATCH_PARAMETERS, batch_name)
+    run_scaps_batch_simulation(simulation_name, batch_name)
+    destination = os.path.join(BATCH_PATH, f"{batch_name}.sbf")
+    results_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.iv")
+    results = parse_iv_file(results_path)
+    delete_file(destination)
+    return results
+
+
+def write_csv_file(results) :
+    csv_line = ""
+    for result in results :
+        csv_line += ",".join(result) + "\n"
+    with open(CSV_PATH, 'a') as f:
+        f.write(csv_line)
+
+
+preparation_simulation()
+results = run_batch("simu", "batch1")
+write_csv_file(results)
+post_simulation_cleanup()
