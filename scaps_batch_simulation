@@ -161,13 +161,14 @@ def parse_iv_file(filepath: str) -> list[list[str]]:
     return results
 
 
-def run_batch(simulation_name, batch_name):
-    generate_sbf_file(BATCH_PARAMETERS, batch_name)
+def run_batch(simulation_name, batch_name, batch_parameters):
+    generate_sbf_file(batch_parameters, batch_name)
     run_scaps_batch_simulation(simulation_name, batch_name)
     destination = os.path.join(BATCH_PATH, f"{batch_name}.sbf")
     results_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.iv")
     results = parse_iv_file(results_path)
     delete_file(destination)
+    delete_file(results_path)
     return results
 
 
@@ -179,7 +180,7 @@ def write_csv_file(results) :
         f.write(csv_line)
 
 
-preparation_simulation()
-results = run_batch("simu", "batch1")
-write_csv_file(results)
-post_simulation_cleanup()
+# preparation_simulation()
+# results = run_batch("simu", "batch1")
+# write_csv_file(results)
+# post_simulation_cleanup()
