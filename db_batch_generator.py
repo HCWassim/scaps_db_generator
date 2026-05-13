@@ -5,7 +5,7 @@ from config import BATCH_PARAMETERS
 from scaps_batch_simulation import run_batch, write_csv_file
 
 def run_and_return(parameters):
-    return run_batch(f"simu_{parameters["startvalue"]}", f"batch_{parameters["startvalue"]}", parameters)
+    return run_batch(f"simu_{parameters[0]['startvalue']}", f"batch_{parameters[0]['startvalue']}", parameters)
 
 if __name__ == "__main__":
     preparation_simulation()
@@ -21,3 +21,5 @@ if __name__ == "__main__":
 
     for result in results:
         write_csv_file(result)
+    
+    post_simulation_cleanup()

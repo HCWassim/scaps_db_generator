@@ -56,7 +56,7 @@ def run_scaps_batch_simulation(simulation_name, batch_name):
         f'set quitscript.quitSCAPS\n'
     )
 
-    script_name = f"{SCRIPT_NAME}_batch.script"
+    script_name = f"{simulation_name}_{SCRIPT_NAME}_batch.script"
     full_script_path = os.path.join(SCRIPT_PATH, script_name)
 
     print(full_script_path)
