@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from utils import split_interval
+from interval import split_interval
 
 load_dotenv()
 
@@ -29,7 +29,7 @@ P0_LABEL3 = "IF Nt total"
 P0_LABEL4 = "nihil"
 DEFAULT_DENSITY_SURFACE_FROM = 5e14
 DEFAULT_DENSITY_SURFACE_TO = 5e15
-DEFAULT_DENSITY_SURFACE_STEPS = 10
+DEFAULT_DENSITY_SURFACE_STEPS = 2
 
 P1_LABEL1 = "layer 1"
 P1_LABEL2 = "defect 1"

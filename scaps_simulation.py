@@ -1,34 +1,9 @@
-import subprocess
 import os
-from dotenv import load_dotenv
-import shutil
-from config import SCAPS_PATH, DEF_PATH, RESULTS_PATH, SCRIPT_PATH, SCRIPT_NAME, BASELINE_DIR, BASELINE_NAME, BASELINE_PATH, CSV_PATH, V_CSV_PATH, SIMULATION_NAME
-
-load_dotenv()
-
-# # chemin scaps :
-# SCAPS_PATH = os.getenv("SCAPS_EXE_PATH")
-# DEF_PATH = os.getenv("SCAPS_DEF_DIR")
-# RESULTS_PATH = os.getenv("SCAPS_RESULTS_DIR")
-
-# # chemin relatif :
-# SCRIPT_PATH = os.path.abspath(os.getenv("SCRIPTS_DIR"))
-# SCRIPT_NAME = os.getenv("SCRIPT_NAME")
-# BASELINE_DIR = os.path.abspath(os.getenv("BASELINE_DIR"))
-# BASELINE_NAME = os.getenv("BASELINE_FILENAME")
-# BASELINE_PATH = os.path.join(BASELINE_DIR, BASELINE_NAME)
-# CSV_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_PATH"))
-# V_CSV_PATH = os.path.abspath(os.getenv("V_CSV_PATH"))
-# SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
+from utils import scaps_execution
+from config import RESULTS_PATH, SCRIPT_NAME, BASELINE_NAME, V_CSV_PATH, SIMULATION_NAME
 
 
-os.makedirs(SCRIPT_PATH, exist_ok=True)
-os.makedirs(os.path.dirname(BASELINE_PATH), exist_ok=True)
-os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
-os.makedirs(os.path.dirname(V_CSV_PATH), exist_ok=True)
-
-
-def run_scaps_simulation(default_density_surface, default_density_volume, thickness,  baseline, simulation_name, script_path = SCRIPT_PATH):
+def run_scaps_simulation(default_density_surface, default_density_volume, thickness,  baseline, simulation_name):
     """
     exécute la simulation de scaps en utilisant le script généré
     :param default_density: densité de défauts par défaut
@@ -36,10 +11,7 @@ def run_scaps_simulation(default_density_surface, default_density_volume, thickn
     :param thickness: épaisseur de la couche
     :param baseline: chemin vers le fichier .def à utiliser pour la simulation
     :param simulation_name: nom du fichier de résultat de la simulation
-    :param script_path: chemin vers le dossier où le script sera créé
     """
-
-    print(f"default_density_surface: {default_density_surface}")
 
     script_content = (
         f'load definitionfile {baseline}\n'
@@ -55,48 +27,7 @@ def run_scaps_simulation(default_density_surface, default_density_volume, thickn
     )
 
     script_name = f"{SCRIPT_NAME}_{default_density_surface}_{default_density_volume}_{thickness}.script"
-    full_script_path = os.path.join(script_path, script_name)
-
-    print(full_script_path)
-
-    with open(full_script_path, 'w') as script_file:
-        script_file.write(script_content)
-
-    try:
-        print(f"Exécution de SCAPS avec le script : {full_script_path}")
-        SCAPS_DIR = os.path.dirname(SCAPS_PATH)
-        subprocess.run([SCAPS_PATH, full_script_path], cwd=SCAPS_DIR, check=True)
-        print("Simulation terminée")
-    except subprocess.CalledProcessError:
-        pass
-
-    if os.path.isfile(full_script_path):
-        os.remove(full_script_path)
-    else:
-        print(f"Le script {full_script_path} n'existe pas et ne peut pas être supprimé.")
-
-
-def baseline_scaps_insertion(source, destination):
-    """
-    copie le fichier .def dans le dossier baseline puis le colle dans le dossier def de scaps
-    :param source: chemin vers le fichier .def à copier
-    :param destination: chemin vers le dossier def de scaps 
-    """
-    if not os.path.isfile(source):
-        print(f"Le fichier {source} n'existe pas.")
-        return
-    shutil.copy2(source, destination)
-
-
-def delete_file(file_path):
-    """
-    supprime le fichier .def qui a été collé dans le dossier def de scaps après l'avoir utilisé pour la simulation
-    :param file_path: chemin vers le fichier .def à supprimer 
-    """
-    if os.path.isfile(file_path):
-        os.remove(file_path)
-    else :
-        print(f"Le fichier {file_path} n'existe pas.")
+    scaps_execution(script_name, script_content)
 
 
 def get_iv_file_content(iv_file_path, v_path_file = None, save_v = False):
@@ -136,16 +67,6 @@ def get_iv_file_content(iv_file_path, v_path_file = None, save_v = False):
     csv_iv_line = ",".join(csv_data)
     csv_iv_line += "\n"
     return csv_iv_line
-
-
-def preparation_simulation():
-    destination = os.path.join(DEF_PATH, BASELINE_NAME)
-    baseline_scaps_insertion(BASELINE_PATH, destination)
-
-
-def post_simulation_cleanup():
-    destination = os.path.join(DEF_PATH, BASELINE_NAME)
-    delete_file(destination)
 
 
 def run(default_density_surface = 5e14, default_density_volume = 5e15, thickness = 1.5e-2, save_v = False):

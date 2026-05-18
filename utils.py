@@ -1,62 +1,83 @@
-def format_sci(value: float) -> str:
-    """Formate un float en notation scientifique style SCAPS (ex: 5.000E+14)"""
-    formatted = f"{value:.3E}"
-    # Normalise l'exposant : E+4 → E+04, E-4 → E-04
-    mantissa, exp = formatted.split("E")
-    sign = exp[0]
-    digits = exp[1:].zfill(2)
-    return f"{mantissa}E{sign}{digits}"
+import os
+import time
+import shutil
+import subprocess
+import multiprocessing
+from config import SCRIPT_PATH, SCAPS_PATH, DEF_PATH, BASELINE_NAME, BASELINE_PATH
 
-
-def split_interval(from_val: float, to_val: float, steps: int, n: int) -> list[dict]:
+def scaps_execution(script_name, script_content) :
     """
-    Découpe un intervalle [from_val, to_val] en n sous-intervalles.
-    
-    Contrainte : chaque sous-intervalle doit avoir au minimum 2 steps.
-    Si n est trop grand pour satisfaire cette contrainte, n est réduit automatiquement.
-    
-    Args:
-        from_val : valeur de départ
-        to_val   : valeur de fin
-        steps    : nombre de steps total
-        n        : nombre de sous-intervalles souhaité
-    
-    Returns:
-        Liste de dicts avec les clés 'from', 'to', 'steps' pour chaque sous-intervalle
+    Gestion de l'exécution de SCAPS à partir d'un script donné
+    :param script_name: nom du script à créer pour l'exécution de SCAPS
+    :param script_content: contenu du script à créer pour l'exécution de SCAPS
     """
-    # Contrainte : chaque sous-intervalle doit avoir au moins 2 steps
-    # => n ne peut pas dépasser steps // 2
-    max_n = steps // 2
-    if max_n < 1:
-        raise ValueError(f"Impossible de créer des sous-intervalles : steps={steps} doit être >= 2.")
-    
-    if n > max_n:
-        print(f"[Warning] n={n} réduit à {max_n} pour garantir >= 2 steps par sous-intervalle.")
-        n = max_n
+    full_script_path = os.path.join(SCRIPT_PATH, script_name)
+    with open(full_script_path, 'w') as script_file:
+        script_file.write(script_content)
+    try :
+        print(f"Exécution de SCAPS avec le script : {full_script_path}")
+        SCAPS_DIR = os.path.dirname(SCAPS_PATH)
+        subprocess.run([SCAPS_PATH, full_script_path], cwd=SCAPS_DIR, check=True)
+        print("Simulation terminée")
+    except subprocess.CalledProcessError:
+        pass
+    if os.path.isfile(full_script_path):
+        os.remove(full_script_path)
+    else:
+        print(f"Le script {full_script_path} n'existe pas et ne peut pas être supprimé.")
 
-    # Répartition des steps en n parts aussi égales que possible
-    # Les "steps restants" sont distribués 1 par 1 sur les premiers sous-intervalles
-    base_steps = steps // n
-    remainder  = steps % n
 
-    intervals = []
-    step_size = (to_val - from_val) / steps  # taille d'un step en unité réelle
+def baseline_scaps_insertion(source, destination):
+    """
+    copie le fichier .def dans le dossier baseline puis le colle dans le dossier def de scaps
+    :param source: chemin vers le fichier .def à copier
+    :param destination: chemin vers le dossier def de scaps 
+    """
+    if not os.path.isfile(source):
+        print(f"Le fichier {source} n'existe pas.")
+        return
+    shutil.copy2(source, destination)
 
-    current_from = from_val
 
-    for i in range(n):
-        sub_steps = base_steps + (1 if i < remainder else 0)
-        sub_to    = current_from + sub_steps * step_size
+def delete_file(file_path):
+    """
+    supprime le fichier .def qui a été collé dans le dossier def de scaps après l'avoir utilisé pour la simulation
+    :param file_path: chemin vers le fichier .def à supprimer 
+    """
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+    else :
+        print(f"Le fichier {file_path} n'existe pas.")
 
-        # Arrondi propre pour le dernier intervalle (évite les flottants résiduels)
-        if i == n - 1:
-            sub_to = to_val
 
-        intervals.append({
-            "from":  format_sci(current_from),
-            "to":    format_sci(sub_to),
-            "steps": sub_steps
-        })
-        current_from = sub_to
+def preparation_simulation():
+    """
+    prépare l'environnement de simulation
+    """
+    destination = os.path.join(DEF_PATH, BASELINE_NAME)
+    baseline_scaps_insertion(BASELINE_PATH, destination)
 
-    return intervals
+
+def post_simulation_cleanup():
+    """
+    nettoie l'environnement de simulation
+    """
+    destination = os.path.join(DEF_PATH, BASELINE_NAME)
+    delete_file(destination)
+
+
+def run_multiprocess(process_task, parameters):
+    """
+    Exécute un batch de simulations en parallèle
+    :param process_task: fonction à exécuter pour chaque ensemble de paramètres
+    :param parameters: liste de paramètres à traiter
+    :return: liste des résultats de chaque exécution
+    """
+    preparation_simulation()
+    start_time = time.time()
+    print("Lancement du batch de simulations...")
+    with multiprocessing.Pool() as pool:
+        outputs = pool.map(process_task, parameters)
+    end_time = time.time()
+    print(f"Temps de traitement : {end_time - start_time:.2f} secondes")
+    return outputs

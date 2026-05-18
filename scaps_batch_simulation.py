@@ -1,10 +1,14 @@
 import re
 import os
-import subprocess
-from config import SCRIPT_NAME, SCAPS_PATH, SCRIPT_PATH, BASELINE_NAME, BATCH_PATH, BATCH_PARAMETERS, RESULTS_PATH, CSV_PATH
-from scaps_simulation import preparation_simulation, post_simulation_cleanup, delete_file
+from utils import scaps_execution
+from config import SCRIPT_NAME, BASELINE_NAME, BATCH_PATH, RESULTS_PATH, CSV_PATH
 
 def generate_sbf_file(parameters, batch_name):
+    """
+    génère un fichier .sbf correspondant à un fichier de batch scaps
+    :param parameters: liste de dictionnaires contenant les paramètres du batch
+    :param batch_name: nom du fichier de batch à générer
+    """
     header = "batch display mode = not suppressed\n"
     blocks = [
         f"\n"
@@ -50,32 +54,13 @@ def run_scaps_batch_simulation(simulation_name, batch_name):
         
         # obtention des résultats
         f'calculate batch\n'
-        # f'get iv uv\n'
 
         f'save results.iv batch_{simulation_name}.iv\n'
         f'set quitscript.quitSCAPS\n'
     )
 
     script_name = f"{simulation_name}_{SCRIPT_NAME}_batch.script"
-    full_script_path = os.path.join(SCRIPT_PATH, script_name)
-
-    print(full_script_path)
-
-    with open(full_script_path, 'w') as script_file:
-        script_file.write(script_content)
-
-    try:
-        print(f"Exécution de SCAPS avec le script : {full_script_path}")
-        SCAPS_DIR = os.path.dirname(SCAPS_PATH)
-        subprocess.run([SCAPS_PATH, full_script_path], cwd=SCAPS_DIR, check=True)
-        print("Simulation terminée")
-    except subprocess.CalledProcessError:
-        pass
-
-    if os.path.isfile(full_script_path):
-        os.remove(full_script_path)
-    else:
-        print(f"Le script {full_script_path} n'existe pas et ne peut pas être supprimé.")
+    scaps_execution(script_name, script_content)
 
 
 def parse_iv_file(filepath: str) -> list[list[str]]:
@@ -164,12 +149,10 @@ def parse_iv_file(filepath: str) -> list[list[str]]:
 def run_batch(simulation_name, batch_name, batch_parameters):
     generate_sbf_file(batch_parameters, batch_name)
     run_scaps_batch_simulation(simulation_name, batch_name)
-    destination = os.path.join(BATCH_PATH, f"{batch_name}.sbf")
-    results_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.iv")
-    results = parse_iv_file(results_path)
-    delete_file(destination)
-    delete_file(results_path)
-    return results
+    full_batch_path = os.path.join(BATCH_PATH, f"{batch_name}.sbf")
+    full_results_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.iv")
+    results = parse_iv_file(full_results_path)
+    return full_batch_path, full_results_path, results
 
 
 def write_csv_file(results) :
@@ -178,9 +161,3 @@ def write_csv_file(results) :
         csv_line += ",".join(result) + "\n"
     with open(CSV_PATH, 'a') as f:
         f.write(csv_line)
-
-
-# preparation_simulation()
-# results = run_batch("simu", "batch1")
-# write_csv_file(results)
-# post_simulation_cleanup()

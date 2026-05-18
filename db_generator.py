@@ -1,9 +1,7 @@
-import time
 import itertools
-import multiprocessing
-from scaps_simulation import run, preparation_simulation, post_simulation_cleanup
-from config import DEFAULT_DENSITY_SURFACE_FROM, DEFAULT_DENSITY_SURFACE_TO, DEFAULT_DENSITY_SURFACE_STEPS, DEFAULT_DENSITY_VOLUME_FROM, DEFAULT_DENSITY_VOLUME_TO, DEFAULT_DENSITY_VOLUME_STEPS, THICKNESS_FROM, THICKNESS_TO, THICKNESS_STEPS
-from config import CSV_PATH
+from scaps_simulation import run
+from utils import post_simulation_cleanup, run_multiprocess
+from config import DEFAULT_DENSITY_SURFACE_FROM, DEFAULT_DENSITY_SURFACE_TO, DEFAULT_DENSITY_SURFACE_STEPS, DEFAULT_DENSITY_VOLUME_FROM, DEFAULT_DENSITY_VOLUME_TO, DEFAULT_DENSITY_VOLUME_STEPS, THICKNESS_FROM, THICKNESS_TO, THICKNESS_STEPS, CSV_PATH
 
 
 def generate_batch_values(from_val, to_val, steps) :
@@ -21,6 +19,7 @@ def generate_batch_values(from_val, to_val, steps) :
         for i in range(num_points)
     ]
 
+
 def generate_batch() :
     lst_DD_surface = generate_batch_values(DEFAULT_DENSITY_SURFACE_FROM, DEFAULT_DENSITY_SURFACE_TO, DEFAULT_DENSITY_SURFACE_STEPS)
     lst_DD_volume = generate_batch_values(DEFAULT_DENSITY_VOLUME_FROM, DEFAULT_DENSITY_VOLUME_TO, DEFAULT_DENSITY_VOLUME_STEPS)
@@ -33,17 +32,8 @@ def run_and_return(parameters):
 
 
 if __name__ == "__main__":
-    preparation_simulation()
     parameters = generate_batch()
-
-    start_time = time.time()
-    print("Lancement du batch de simulations...")
-
-    with multiprocessing.Pool() as pool:
-        results = pool.map(run_and_return, parameters)
-
-    end_time = time.time()
-    print(f"Temps de traitement : {end_time - start_time:.2f} secondes")
+    results = run_multiprocess(run_and_return, parameters)
 
     # Écriture CSV séquentielle, dans l'ordre, sans race condition
     results.sort(key=lambda x: float(x[0]))  # tri par densité
@@ -51,6 +41,5 @@ if __name__ == "__main__":
         for density, line in results:
             if line:
                 f.write(line)
-
     print("fin du batch de simulation")
     post_simulation_cleanup()
