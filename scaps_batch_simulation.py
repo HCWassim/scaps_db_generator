@@ -1,5 +1,5 @@
-import re
 import os
+from parser import parse_iv_file
 from utils import scaps_execution
 from config import SCRIPT_NAME, BASELINE_NAME, BATCH_PATH, RESULTS_PATH, CSV_PATH
 
@@ -59,6 +59,7 @@ def run_scaps_batch_simulation(simulation_name, batch_name):
 
         # valeur des paramètres fixes
         f'set external.Rs 1E-30\n' # résistance série
+        # f'set layer1.Eg 1.55\n' # bandgap
         
         # obtention des résultats
         f'calculate batch\n'
@@ -71,95 +72,13 @@ def run_scaps_batch_simulation(simulation_name, batch_name):
     scaps_execution(script_name, script_content)
 
 
-def parse_iv_file(filepath: str) -> list[list[str]]:
-    """
-    Parse a SCAPS .iv batch file.
- 
-    Returns a list of rows, one per simulation. Each row is:
-        [v0, v1, ..., vN, i0, i1, ..., iN, Voc, Jsc, FF, eta, V_MPP, J_MPP]
-    All values are kept as strings (no float conversion).
-    """
-    # Data lines: first two columns are voltage and current, tab-separated
-    iv_re = re.compile(
-        r'^\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'   # v(V) — first column
-        r'[\t ]+'                                 # separator
-        r'(-?\d+\.\d+(?:[eE][+-]?\d+)?)'         # jtot — second column
-    )
-    # Parameters: "Voc =\t    0.765559\tVolt"
-    param_re = {
-        'Voc':   re.compile(r'^Voc\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
-        'Jsc':   re.compile(r'^Jsc\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
-        'FF':    re.compile(r'^FF\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
-        'eta':   re.compile(r'^eta\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
-        'V_MPP': re.compile(r'^V_MPP\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
-        'J_MPP': re.compile(r'^J_MPP\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
-    }
-    header_re = re.compile(r'^\s*v\(V\)[\t ]')
- 
-    results = []
- 
-    current_voltages: list[str] = []
-    current_currents: list[str] = []
-    current_params: dict[str, str] = {}
-    in_iv_table = False
- 
-    def flush():
-        """Save current simulation if complete."""
-        if current_voltages and len(current_params) == 6:
-            row = (
-                current_voltages
-                + current_currents
-                + [current_params[k] for k in ('Voc', 'Jsc', 'FF', 'eta', 'V_MPP', 'J_MPP')]
-            )
-            results.append(row)
- 
-    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
-        for line in f:
-            stripped = line.strip()
- 
-            # Detect start of IV table header → flush previous simulation and reset
-            if header_re.match(line):
-                if current_voltages or current_params:
-                    flush()
-                current_voltages = []
-                current_currents = []
-                current_params = {}
-                in_iv_table = True
-                continue
- 
-            # Collect IV data points
-            if in_iv_table:
-                # Skip blank lines (file has a blank line right after the header)
-                if stripped == '':
-                    continue
-                m = iv_re.match(line)
-                if m:
-                    current_voltages.append(m.group(1))
-                    current_currents.append(m.group(2))
-                    continue
-                else:
-                    # Non-data, non-blank line ends the IV table
-                    in_iv_table = False
- 
-            # Collect solar cell parameters
-            for key, pattern in param_re.items():
-                m = pattern.match(stripped)
-                if m:
-                    current_params[key] = m.group(1)
-                    break
- 
-    # Flush last simulation
-    flush()
-    return results
-
-
 def run_batch(simulation_name, batch_name, batch_parameters):
     generate_sbf_file(batch_parameters, batch_name)
     run_scaps_batch_simulation(simulation_name, batch_name)
     full_batch_path = os.path.join(BATCH_PATH, f"{batch_name}.sbf")
     full_results_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.iv")
-    results = parse_iv_file(full_results_path)
-    return full_batch_path, full_results_path, results
+    results_iv = parse_iv_file(full_results_path)
+    return full_batch_path, full_results_path, results_iv
 
 
 def write_csv_file(results) :

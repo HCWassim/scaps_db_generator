@@ -23,7 +23,7 @@ def plot_iv_curves(chemin_fichier, n_points=None):
 
     for idx, ligne in enumerate(donnees):
         # Déduction automatique du nombre de points si non spécifié
-        n = n_points if n_points is not None else (len(ligne) - 6) // 2
+        n = n_points if n_points is not None else (len(ligne) - 10) // 2
 
         V = ligne[:n]
         I = ligne[n : 2 * n]
@@ -37,6 +37,8 @@ def plot_iv_curves(chemin_fichier, n_points=None):
                 label_courbe = f"Sim {idx+1}"
 
             ax.plot(V, I, '-', linewidth=2, label=label_courbe)
+        else :
+            ax.plot(V, I, '-', linewidth=1, alpha=0.5)
 
     ax.set_xlabel('Tension $V$ (V)', fontsize=11)
     ax.set_ylabel('Densité de courant $J$ (mA/cm²)', fontsize=11)
