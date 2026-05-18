@@ -1,7 +1,7 @@
 import os
-from parser import parse_iv_file
+from parser import parse_iv_file, parse_qe_file
 from utils import scaps_execution
-from config import SCRIPT_NAME, BASELINE_NAME, BATCH_PATH, RESULTS_PATH, CSV_PATH
+from config import SCRIPT_NAME, BASELINE_NAME, BATCH_PATH, RESULTS_PATH
 
 def generate_sbf_file(parameters, batch_name):
     """
@@ -48,14 +48,18 @@ def run_scaps_batch_simulation(simulation_name, batch_name):
         f'load spectrumfile AM1_5G 1 sun.spe\n'
         f'load batchsettingsfile {batch_name}.sbf\n'
 
-        # mise en place des settings
+        # mise en place des settings IV
         f'action light\n'
         f'action iv.checkaction 1\n'
-
-        # fixer un intervalle de tension
         f'action iv.startV -0.5\n'
         f'action iv.stopV 1.2\n'
         f'action iv.points 85\n'
+
+        # mise en place des settings EQE :
+        f'action qe.checkaction 1\n'
+        # f'action qe.startlambda 300\n'
+        # f'action qe.stoplambda 900\n'
+        # f'action qe.points 85\n'
 
         # valeur des paramètres fixes
         f'set external.Rs 1E-30\n' # résistance série
@@ -65,6 +69,7 @@ def run_scaps_batch_simulation(simulation_name, batch_name):
         f'calculate batch\n'
 
         f'save results.iv batch_{simulation_name}.iv\n'
+        f'save results.qe batch_{simulation_name}.qe\n'
         f'set quitscript.quitSCAPS\n'
     )
 
@@ -76,14 +81,16 @@ def run_batch(simulation_name, batch_name, batch_parameters):
     generate_sbf_file(batch_parameters, batch_name)
     run_scaps_batch_simulation(simulation_name, batch_name)
     full_batch_path = os.path.join(BATCH_PATH, f"{batch_name}.sbf")
-    full_results_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.iv")
-    results_iv = parse_iv_file(full_results_path)
-    return full_batch_path, full_results_path, results_iv
+    full_results_iv_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.iv")
+    full_results_qe_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.qe")
+    results_iv = parse_iv_file(full_results_iv_path)
+    results_qe = parse_qe_file(full_results_qe_path)
+    return full_batch_path, full_results_iv_path, full_results_qe_path, results_iv, results_qe
 
 
-def write_csv_file(results) :
+def write_csv_file(results, path) :
     csv_line = ""
     for result in results :
         csv_line += ",".join(result) + "\n"
-    with open(CSV_PATH, 'a') as f:
+    with open(path, 'a') as f:
         f.write(csv_line)

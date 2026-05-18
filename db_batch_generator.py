@@ -1,4 +1,4 @@
-from config import BATCH_PARAMETERS
+from config import BATCH_PARAMETERS, CSV_IV_PATH, CSV_QE_PATH
 from utils import post_simulation_cleanup, delete_file, run_multiprocess
 from scaps_batch_simulation import run_batch, write_csv_file
 
@@ -8,9 +8,11 @@ def run_and_return(parameters):
 if __name__ == "__main__":
     outputs = run_multiprocess(run_and_return, BATCH_PARAMETERS)
 
-    for batch_path, result_path, results in outputs:
+    for batch_path, result_iv_path, result_qe_path, results_iv, results_qe in outputs:
         delete_file(batch_path)
-        delete_file(result_path)
-        write_csv_file(results)
-    
+        delete_file(result_iv_path)
+        delete_file(result_qe_path)
+        write_csv_file(results_iv, CSV_IV_PATH)
+        write_csv_file(results_qe, CSV_QE_PATH)
+
     post_simulation_cleanup()
