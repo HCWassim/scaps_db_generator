@@ -47,10 +47,18 @@ def run_scaps_batch_simulation(simulation_name, batch_name):
         f'load definitionfile {BASELINE_NAME}\n'
         f'load spectrumfile AM1_5G 1 sun.spe\n'
         f'load batchsettingsfile {batch_name}.sbf\n'
-        
+
         # mise en place des settings
         f'action light\n'
-        f'action iv.checkaction\n'        
+        f'action iv.checkaction 1\n'
+
+        # fixer un intervalle de tension
+        f'action iv.startV -0.5\n'
+        f'action iv.stopV 1.2\n'
+        f'action iv.points 85\n'
+
+        # valeur des paramètres fixes
+        f'set external.Rs 1E-30\n' # résistance série
         
         # obtention des résultats
         f'calculate batch\n'
