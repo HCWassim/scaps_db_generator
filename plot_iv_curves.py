@@ -1,36 +1,97 @@
 import pandas as pd
+import os
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 
+is_scaps_batch = True
 
-V = pd.read_csv("./csv/V.csv", header=None).values.flatten()[:41]
-J = pd.read_csv("./csv/iv_curve.csv", header=None).iloc[:, :41]
+def plot_iv_curves(chemin_fichier, n_points=None):
+    """
+    Charge un fichier CSV et superpose toutes ses lignes sur un seul graphique I-V.
 
-print(f"Tension V : {len(V)} points")
-print(f"Courbes J : {len(J)} courbes x {J.shape[1]} points")
+    Chaque ligne doit suivre le format :
+    [v0, ..., vN-1, i0, ..., iN-1, Voc, Jsc, FF, eta, V_MPP, J_MPP]
 
-fig, ax = plt.subplots(figsize=(10, 6))
-colors = cm.viridis(np.linspace(0, 1, len(J)))
+    Parameters:
+    -----------
+    chemin_fichier : str
+        Le chemin vers votre fichier .csv
+    n_points : int or None
+        Nombre de points de mesure. Si None, déduit automatiquement depuis (len - 6) // 2.
+    """
+    donnees = np.loadtxt(chemin_fichier, delimiter=',', ndmin=2)
 
-for i, (_, row) in enumerate(J.iterrows()):
-    ax.plot(V, row.values, color=colors[i], linewidth=1.2, label=f"Courbe {i+1}")
+    fig, ax = plt.subplots(figsize=(10, 7))
 
-ax.set_xlabel("Tension V (V)", fontsize=13)
-ax.set_ylabel("Densité de courant J (mA/cm²)", fontsize=13)
-ax.set_title("Courbes I-V", fontsize=15, fontweight="bold")
-ax.grid(True, linestyle="--", alpha=0.5)
-ax.axhline(0, color="black", linewidth=0.8)
-ax.axvline(0, color="black", linewidth=0.8)
+    for idx, ligne in enumerate(donnees):
+        # Déduction automatique du nombre de points si non spécifié
+        n = n_points if n_points is not None else (len(ligne) - 6) // 2
 
-if len(J) <= 15:
-    ax.legend(loc="best", fontsize=8, ncol=2)
-else:
-    sm = plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(1, len(J)))
-    sm.set_array([])
-    cbar = plt.colorbar(sm, ax=ax)
-    cbar.set_label("Indice de courbe", fontsize=11)
+        V          = ligne[:n]
+        I          = ligne[n : 2 * n]
+        indicateurs = ligne[2 * n:]  # [Voc, Jsc, FF, eta, V_MPP, J_MPP]
 
-plt.tight_layout()
-plt.show()
-print("Graphe sauvegardé : iv_curves.png")
+        if len(indicateurs) >= 4:
+            Voc, Jsc, FF, eta = indicateurs[:4]
+            label_courbe = f"Sim {idx+1} ($\\eta$ = {eta:.1f} %, $V_{{oc}}$ = {Voc:.3f} V)"
+        else:
+            label_courbe = f"Sim {idx+1}"
+
+        courbe, = ax.plot(V, I, '-', linewidth=2, label=label_courbe)
+        couleur_courbe = courbe.get_color()
+
+        if len(indicateurs) >= 6:
+            V_mpp, J_mpp = indicateurs[4], indicateurs[5]
+            ax.scatter(V_mpp, J_mpp, color=couleur_courbe, s=45,
+                       edgecolors='black', zorder=5)
+
+    ax.set_xlabel('Tension $V$ (V)', fontsize=11)
+    ax.set_ylabel('Densité de courant $J$ (mA/cm²)', fontsize=11)
+    ax.set_title('Superposition des caractéristiques I-V', fontsize=13, fontweight='bold')
+    ax.grid(True, linestyle=':', alpha=0.6)
+    ax.legend(loc='best', fontsize=9.5)
+    plt.tight_layout()
+
+    nom_image = "./img/superposition_courbes_iv.png"
+    os.makedirs(os.path.dirname(nom_image), exist_ok=True)
+    fig.savefig(nom_image, dpi=300)
+    plt.show()
+    plt.close(fig)
+
+    print(f"Graphique sauvegardé ({len(donnees)} courbe(s)) : {nom_image}")
+
+if is_scaps_batch:
+    plot_iv_curves(r"./csv/iv_curve.csv")
+else :
+
+    V = pd.read_csv("./csv/V.csv", header=None).values.flatten()[:41]
+    J = pd.read_csv("./csv/iv_curve.csv", header=None).iloc[:, :41]
+
+    print(f"Tension V : {len(V)} points")
+    print(f"Courbes J : {len(J)} courbes x {J.shape[1]} points")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    colors = cm.viridis(np.linspace(0, 1, len(J)))
+
+    for i, (_, row) in enumerate(J.iterrows()):
+        ax.plot(V, row.values, color=colors[i], linewidth=1.2, label=f"Courbe {i+1}")
+
+    ax.set_xlabel("Tension V (V)", fontsize=13)
+    ax.set_ylabel("Densité de courant J (mA/cm²)", fontsize=13)
+    ax.set_title("Courbes I-V", fontsize=15, fontweight="bold")
+    ax.grid(True, linestyle="--", alpha=0.5)
+    ax.axhline(0, color="black", linewidth=0.8)
+    ax.axvline(0, color="black", linewidth=0.8)
+
+    if len(J) <= 15:
+        ax.legend(loc="best", fontsize=8, ncol=2)
+    else:
+        sm = plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(1, len(J)))
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax)
+        cbar.set_label("Indice de courbe", fontsize=11)
+
+    plt.tight_layout()
+    plt.show()
+    print("Graphe sauvegardé : iv_curves.png")

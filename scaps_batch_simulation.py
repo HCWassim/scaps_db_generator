@@ -68,16 +68,16 @@ def parse_iv_file(filepath: str) -> list[list[str]]:
     Parse a SCAPS .iv batch file.
  
     Returns a list of rows, one per simulation. Each row is:
-        [v0, v1, ..., vN, Voc, Jsc, FF, eta, V_MPP, J_MPP]
+        [v0, v1, ..., vN, i0, i1, ..., iN, Voc, Jsc, FF, eta, V_MPP, J_MPP]
+    All values are kept as strings (no float conversion).
     """
-    # Patterns
-    # Data lines: first column is voltage (leading whitespace + number), columns are tab-separated
-    voltage_re = re.compile(
+    # Data lines: first two columns are voltage and current, tab-separated
+    iv_re = re.compile(
         r'^\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'   # v(V) — first column
-        r'[\t ]+'                                 # tab or space separator
-        r'(-?\d+\.\d+(?:[eE][+-]?\d+)?)'         # jtot  — second column (ignored in output)
+        r'[\t ]+'                                 # separator
+        r'(-?\d+\.\d+(?:[eE][+-]?\d+)?)'         # jtot — second column
     )
-    # Parameters are tab-separated: "Voc =\t    0.765559\tVolt"
+    # Parameters: "Voc =\t    0.765559\tVolt"
     param_re = {
         'Voc':   re.compile(r'^Voc\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
         'Jsc':   re.compile(r'^Jsc\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
@@ -91,50 +91,49 @@ def parse_iv_file(filepath: str) -> list[list[str]]:
     results = []
  
     current_voltages: list[str] = []
+    current_currents: list[str] = []
     current_params: dict[str, str] = {}
     in_iv_table = False
  
     def flush():
         """Save current simulation if complete."""
         if current_voltages and len(current_params) == 6:
-            row = current_voltages + [
-                current_params['Voc'],
-                current_params['Jsc'],
-                current_params['FF'],
-                current_params['eta'],
-                current_params['V_MPP'],
-                current_params['J_MPP'],
-            ]
+            row = (
+                current_voltages
+                + current_currents
+                + [current_params[k] for k in ('Voc', 'Jsc', 'FF', 'eta', 'V_MPP', 'J_MPP')]
+            )
             results.append(row)
  
     with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
         for line in f:
             stripped = line.strip()
  
-            # Detect start of IV table header → reset for a new simulation
+            # Detect start of IV table header → flush previous simulation and reset
             if header_re.match(line):
-                # Flush previous simulation if any
                 if current_voltages or current_params:
                     flush()
                 current_voltages = []
+                current_currents = []
                 current_params = {}
                 in_iv_table = True
                 continue
  
-            # Collect voltage points inside IV table
+            # Collect IV data points
             if in_iv_table:
                 # Skip blank lines (file has a blank line right after the header)
                 if stripped == '':
                     continue
-                m = voltage_re.match(line)
+                m = iv_re.match(line)
                 if m:
                     current_voltages.append(m.group(1))
+                    current_currents.append(m.group(2))
                     continue
                 else:
                     # Non-data, non-blank line ends the IV table
                     in_iv_table = False
  
-            # Collect solar cell parameters (can appear anywhere after the table)
+            # Collect solar cell parameters
             for key, pattern in param_re.items():
                 m = pattern.match(stripped)
                 if m:
