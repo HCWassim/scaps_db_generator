@@ -83,8 +83,8 @@ def plot_iv_curves(chemin_fichier, n_points=None):
     fig, ax = plt.subplots(figsize=(11, 7))
 
     for idx, ligne in enumerate(donnees):
-        # Déduction du nombre de points : on retire les 6 indicateurs IV + 4 physiques = 10
-        n = n_points if n_points is not None else (len(ligne) - 10) // 2
+        # Déduction du nombre de points : on retire les 6 indicateurs IV + 4 physiques + 1 id = 11
+        n = n_points if n_points is not None else (len(ligne) - 11) // 2
 
         V = ligne[:n]
         I = ligne[n : 2 * n]

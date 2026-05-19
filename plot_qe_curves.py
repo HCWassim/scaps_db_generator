@@ -7,7 +7,7 @@ def plot_qe_curves(chemin_fichier, n_points=61):
     """Charge un fichier CSV et superpose toutes ses lignes sur un seul graphique QE.
 
     Chaque ligne doit suivre le format :
-    [lambda0, ..., lambdaN-1, qe0, ..., qeN-1, T, N_A, N_t, mu_h]
+    [lambda0, ..., lambdaN-1, qe0, ..., qeN-1, T, N_A, N_t, mu_h, id_def]
 
     Parameters:
     -----------
@@ -25,18 +25,18 @@ def plot_qe_curves(chemin_fichier, n_points=61):
         wavelengths = ligne[:n_points]
         qe_values = ligne[n_points : 2 * n_points]
 
-        # Les 4 derniers paramètres de la ligne
-        indicateurs = ligne[-4:]
+        # Les 5 derniers paramètres de la ligne
+        indicateurs = ligne[-5:]
 
         if idx < 10:
-            if len(ligne) >= (2 * n_points) + 4:
-                T, N_A, N_t, mu_h = indicateurs
+            if len(ligne) >= (2 * n_points) + 5:
+                T, N_A, N_t, mu_h, _ = indicateurs
                 # Formatage de la légende avec les symboles physiques en LaTeX
                 label_courbe = (
                     f"Sim {idx+1} ($T$={T:.0f}K, "
                     f"$N_A$={N_A:.1e}, "
                     f"$N_t$={N_t:.1e}, "
-                    f"$\\mu_h$={mu_h:.1f})"
+                    f"$\\mu_h$={mu_h:.1f}, "
                 )
             else:
                 label_courbe = f"Sim {idx+1}"
