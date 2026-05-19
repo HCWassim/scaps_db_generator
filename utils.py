@@ -81,3 +81,10 @@ def run_multiprocess(process_task, parameters):
     end_time = time.time()
     print(f"Temps de traitement : {end_time - start_time:.2f} secondes")
     return outputs
+
+def write_csv_file(results, path) :
+    csv_line = ""
+    for result in results :
+        csv_line += ",".join(result) + "\n"
+    with open(path, 'a') as f:
+        f.write(csv_line)

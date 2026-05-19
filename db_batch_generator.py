@@ -1,6 +1,6 @@
 from config import BATCH_PARAMETERS, CSV_IV_PATH, CSV_QE_PATH
-from utils import post_simulation_cleanup, delete_file, run_multiprocess
-from scaps_batch_simulation import run_batch, write_csv_file
+from utils import post_simulation_cleanup, delete_file, run_multiprocess, write_csv_file
+from scaps_batch_simulation import run_batch
 
 def run_and_return(parameters):
     return run_batch(f"simu_{parameters[0]['startvalue']}", f"batch_{parameters[0]['startvalue']}", parameters)

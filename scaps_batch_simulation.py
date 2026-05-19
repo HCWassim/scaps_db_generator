@@ -86,11 +86,3 @@ def run_batch(simulation_name, batch_name, batch_parameters):
     results_iv = parse_iv_file(full_results_iv_path)
     results_qe = parse_qe_file(full_results_qe_path)
     return full_batch_path, full_results_iv_path, full_results_qe_path, results_iv, results_qe
-
-
-def write_csv_file(results, path) :
-    csv_line = ""
-    for result in results :
-        csv_line += ",".join(result) + "\n"
-    with open(path, 'a') as f:
-        f.write(csv_line)
