@@ -18,6 +18,7 @@ BASELINE_NAME = os.getenv("BASELINE_FILENAME")
 BASELINE_PATH = os.path.join(BASELINE_DIR, BASELINE_NAME)
 CSV_IV_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_IV_PATH"))
 CSV_QE_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_QE_PATH"))
+CSV_DEF_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_DEF_PATH"))
 SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
 
 CORE = os.cpu_count() or 4

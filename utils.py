@@ -3,7 +3,8 @@ import time
 import shutil
 import subprocess
 import multiprocessing
-from config import SCRIPT_PATH, SCAPS_PATH, DEF_PATH, BASELINE_NAME, BASELINE_PATH
+from config import SCRIPT_PATH, SCAPS_PATH, DEF_PATH, BASELINE_NAME, BASELINE_PATH, CSV_DEF_PATH
+from parser import parse_def_file
 
 def scaps_execution(script_name, script_content) :
     """
@@ -82,9 +83,35 @@ def run_multiprocess(process_task, parameters):
     print(f"Temps de traitement : {end_time - start_time:.2f} secondes")
     return outputs
 
-def write_csv_file(results, path) :
+def write_csv_file(results, path, id_def=None) :
     csv_line = ""
     for result in results :
-        csv_line += ",".join(result) + "\n"
+        if id_def is not None :
+            csv_line += ",".join(result) + f",{id_def}" + "\n"
+        else :
+            csv_line += ",".join(result) + "\n"
     with open(path, 'a') as f:
         f.write(csv_line)
+
+
+def baseline_information(baseline_path=BASELINE_PATH, systemic_writing=False):
+    """
+    Cette fonction : 
+    - récupère les paramètres physiques de la baseline,
+    - détermine le nombre de lignes du fichier def_parameters.csv
+        - dans le cas où le fichier est vide, la fonction écrit le nom des paramètres physiques puis la valeur des paramètres
+        - dans le cas où le fichier contient des données, la fonction écrit une nouvelle ligne avec la valeur des paramètres
+    - retourne le nombre de lignes du fichier def_parameters.csv
+    """
+    nom_parametres, parametres_physique = parse_def_file(baseline_path)
+    with open(CSV_DEF_PATH, 'r') as f:
+        nbr_line = sum(1 for _ in f)
+    if nbr_line == 0 :
+        write_csv_file([nom_parametres], CSV_DEF_PATH)
+        write_csv_file([parametres_physique], CSV_DEF_PATH)
+        nbr_line += 2
+    if systemic_writing:
+        write_csv_file([parametres_physique], CSV_DEF_PATH)
+        nbr_line += 1
+
+    return nbr_line
