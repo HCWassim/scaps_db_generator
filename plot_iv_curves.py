@@ -1,63 +1,3 @@
-# import os
-# import matplotlib.pyplot as plt
-# import numpy as np
-
-
-# def plot_iv_curves(chemin_fichier, n_points=None):
-#     """
-#     Charge un fichier CSV et superpose toutes ses lignes sur un seul graphique I-V.
-
-#     Chaque ligne doit suivre le format :
-#     [v0, ..., vN-1, i0, ..., iN-1, Voc, Jsc, FF, eta, V_MPP, J_MPP]
-
-#     Parameters:
-#     -----------
-#     chemin_fichier : str
-#         Le chemin vers votre fichier .csv
-#     n_points : int or None
-#         Nombre de points de mesure. Si None, déduit automatiquement depuis (len - 6) // 2.
-#     """
-#     donnees = np.loadtxt(chemin_fichier, delimiter=',', ndmin=2)
-
-#     fig, ax = plt.subplots(figsize=(10, 7))
-
-#     for idx, ligne in enumerate(donnees):
-#         # Déduction automatique du nombre de points si non spécifié
-#         n = n_points if n_points is not None else (len(ligne) - 10) // 2
-
-#         V = ligne[:n]
-#         I = ligne[n : 2 * n]
-#         indicateurs = ligne[2 * n:]  # [Voc, Jsc, FF, eta, V_MPP, J_MPP]
-
-#         if idx < 10 :
-#             if len(indicateurs) >= 4:
-#                 Voc, Jsc, FF, eta = indicateurs[:4]
-#                 label_courbe = f"Sim {idx+1} ($\\eta$ = {eta:.1f} %, $V_{{oc}}$ = {Voc:.3f} V)"
-#             else:
-#                 label_courbe = f"Sim {idx+1}"
-
-#             ax.plot(V, I, '-', linewidth=2, label=label_courbe)
-#         else :
-#             ax.plot(V, I, '-', linewidth=1, alpha=0.5)
-
-#     ax.set_xlabel('Tension $V$ (V)', fontsize=11)
-#     ax.set_ylabel('Densité de courant $J$ (mA/cm²)', fontsize=11)
-#     ax.set_title('Superposition des caractéristiques I-V', fontsize=13, fontweight='bold')
-#     ax.grid(True, linestyle=':', alpha=0.6)
-#     ax.legend(loc='best', fontsize=9.5)
-#     plt.tight_layout()
-
-#     nom_image = "./img/superposition_courbes_iv.png"
-#     os.makedirs(os.path.dirname(nom_image), exist_ok=True)
-#     fig.savefig(nom_image, dpi=300)
-#     plt.show()
-#     plt.close(fig)
-
-#     print(f"Graphique sauvegardé ({len(donnees)} courbe(s)) : {nom_image}")
-
-
-# plot_iv_curves(r"./csv/iv_curve.csv")
-
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -83,18 +23,18 @@ def plot_iv_curves(chemin_fichier, n_points=None):
     fig, ax = plt.subplots(figsize=(11, 7))
 
     for idx, ligne in enumerate(donnees):
-        # Déduction du nombre de points : on retire les 6 indicateurs IV + 4 physiques + 1 id = 11
-        n = n_points if n_points is not None else (len(ligne) - 11) // 2
+        # Déduction du nombre de points : on retire les 6 indicateurs IV + 5 physiques + 1 id = 12
+        n = n_points if n_points is not None else (len(ligne) - 13) // 2
 
         V = ligne[:n]
         I = ligne[n : 2 * n]
 
         # Récupération des 4 derniers éléments de la ligne complète
-        param_physiques = ligne[-4:]
+        param_physiques = ligne[-6:]
 
         if idx < 10:
             if len(ligne) >= (2 * n) + 4:
-                T, N_A, N_t, mu_h = param_physiques
+                T, N_A, N_t, mu_h,_,_ = param_physiques
                 # Label combinant le numéro de simulation et les paramètres physiques
                 label_courbe = (
                     f"Sim {idx+1} ($T$={T:.0f}K, "

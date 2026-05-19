@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from interval import split_interval
+from itertools import product
 
 load_dotenv()
 
@@ -37,8 +38,8 @@ P1_LABEL1 = "layer 1"
 P1_LABEL2 = "defect 1"
 P1_LABEL3 = "Nt total"
 P1_LABEL4 = "nihil"
-DEFAULT_DENSITY_VOLUME_FROM = 5E17
-DEFAULT_DENSITY_VOLUME_TO = 5E18
+DEFAULT_DENSITY_VOLUME_FROM = 1E15
+DEFAULT_DENSITY_VOLUME_TO = 1E17
 DEFAULT_DENSITY_VOLUME_STEPS = 2
 
 # Hole mobility :
@@ -49,6 +50,11 @@ P2_LABEL4 = "pure A material"
 HOLE_FROM = 1E1
 HOLE_TO = 3E1
 HOLE_STEPS = 2
+
+
+def combinaison_settings(*settings):
+    return list(product(*settings))
+
 
 def generate_batch_parameter(label1, label2, label3, label4, from_val, to_val, steps):
     return {
@@ -71,3 +77,6 @@ P2 = generate_batch_parameter(P2_LABEL1, P2_LABEL2, P2_LABEL3, P2_LABEL4, HOLE_F
 for interval in divided_intervals:
     P0_subdivide = generate_batch_parameter(P0_LABEL1, P0_LABEL2, P0_LABEL3, P0_LABEL4, interval["from"], interval["to"], interval["steps"])
     BATCH_PARAMETERS.append([P0_subdivide, P1, P2])
+
+
+SETTINGS = combinaison_settings([300, 200], [100, 10, 1]) # Température (K) x Intensité (% de 1 sun)

@@ -25,12 +25,12 @@ def plot_qe_curves(chemin_fichier, n_points=61):
         wavelengths = ligne[:n_points]
         qe_values = ligne[n_points : 2 * n_points]
 
-        # Les 5 derniers paramètres de la ligne
-        indicateurs = ligne[-5:]
+        # Les 6 derniers paramètres de la ligne
+        indicateurs = ligne[-6:]
 
         if idx < 10:
-            if len(ligne) >= (2 * n_points) + 5:
-                T, N_A, N_t, mu_h, _ = indicateurs
+            if len(ligne) >= (2 * n_points) + 6:
+                T, N_A, N_t, mu_h, _, _ = indicateurs
                 # Formatage de la légende avec les symboles physiques en LaTeX
                 label_courbe = (
                     f"Sim {idx+1} ($T$={T:.0f}K, "

@@ -36,11 +36,14 @@ def generate_sbf_file(parameters, batch_name):
         return False
 
 
-def run_scaps_batch_simulation(simulation_name, batch_name):
+def run_scaps_batch_simulation(simulation_name, batch_name, illumination="light", temperature=300, intensity=100):
     """
     exécute la simulation de scaps en utilisant le script généré
     :param simulation_name: nom du fichier de résultat de la simulation
     """
+    if illumination not in ["light", "dark"]:
+        raise ValueError("L'illumination doit être 'light' ou 'dark'.")
+    qe = 1 if illumination == "light" else 0
 
     script_content = (
         # chargement des fichiers pour la simulation
@@ -49,14 +52,18 @@ def run_scaps_batch_simulation(simulation_name, batch_name):
         f'load batchsettingsfile {batch_name}.sbf\n'
 
         # mise en place des settings IV
-        f'action light\n'
+        f'action {illumination}\n'
         f'action iv.checkaction 1\n'
         f'action iv.startV -0.5\n'
         f'action iv.stopV 1.2\n'
         f'action iv.points 85\n'
 
+        # mise en place des settings de la courbe IV :
+        f'action workingpoint.temperature {temperature}\n'
+        f'action intensity.T {intensity}\n'
+
         # mise en place des settings EQE :
-        f'action qe.checkaction 1\n'
+        f'action qe.checkaction {qe}\n'
         # f'action qe.startlambda 300\n'
         # f'action qe.stoplambda 900\n'
         # f'action qe.points 85\n'
@@ -77,9 +84,9 @@ def run_scaps_batch_simulation(simulation_name, batch_name):
     scaps_execution(script_name, script_content)
 
 
-def run_batch(simulation_name, batch_name, batch_parameters):
+def run_batch(simulation_name, batch_name, batch_parameters, illumination="light", temperature=80, intensity=100):
     generate_sbf_file(batch_parameters, batch_name)
-    run_scaps_batch_simulation(simulation_name, batch_name)
+    run_scaps_batch_simulation(simulation_name, batch_name, illumination, temperature, intensity)
     full_batch_path = os.path.join(BATCH_PATH, f"{batch_name}.sbf")
     full_results_iv_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.iv")
     full_results_qe_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.qe")
