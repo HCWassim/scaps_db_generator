@@ -17,7 +17,7 @@ def plot_iv_curves(chemin_fichier, n_points=None):
         Nombre de points de mesure. Si None, déduit automatiquement en retirant
         les 6 métriques IV et les 4 paramètres physiques (total de 10 valeurs).
     """
-    donnees = np.loadtxt(chemin_fichier, delimiter=",", ndmin=2)
+    donnees = np.loadtxt(chemin_fichier, delimiter=",", ndmin=2, skiprows=1)
 
     # Fenêtre élargie pour accueillir la légende détaillée sur le côté
     fig, ax = plt.subplots(figsize=(11, 7))
@@ -32,7 +32,7 @@ def plot_iv_curves(chemin_fichier, n_points=None):
         # Récupération des 4 derniers éléments de la ligne complète
         param_physiques = ligne[-6:]
 
-        if idx < 10:
+        if idx < 40:
             if len(ligne) >= (2 * n) + 4:
                 T, N_A, N_t, mu_h,_,_ = param_physiques
                 # Label combinant le numéro de simulation et les paramètres physiques

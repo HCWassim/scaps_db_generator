@@ -14,7 +14,7 @@ def full_process(process_task, id_def=None):
     outputs = run_multiprocess(process_task, BATCH_PARAMETERS)
     for batch_path, result_iv_path, result_qe_path, results_iv, results_qe in outputs:
         delete_file(batch_path)
-        delete_file(result_iv_path)
+        # delete_file(result_iv_path)
         delete_file(result_qe_path)
         write_csv_file(results_iv, CSV_IV_PATH, id_def=id_def)
         write_csv_file(results_qe, CSV_QE_PATH, id_def=id_def)
@@ -30,7 +30,5 @@ if __name__ == "__main__":
         process_task = partial(run_and_return, illumination="light", temperature=temp, intensity=intensity)
         full_process(process_task, id_def=f"{intensity},{def_id}")
 
-    # process_task_dark_1 = partial(run_and_return, illumination="dark", temperature=300, intensity=0)
-    # process_task_dark_2 = partial(run_and_return, illumination="dark", temperature=200, intensity=0)
-    # full_process(process_task_dark_1, id_def=f"0,{def_id}")
-    # full_process(process_task_dark_2, id_def=f"0,{def_id}")
+    process_task_dark_1 = partial(run_and_return, illumination="dark", temperature=300, intensity=0)
+    full_process(process_task_dark_1, id_def=f"0,{def_id}")

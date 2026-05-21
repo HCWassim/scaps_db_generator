@@ -38,7 +38,7 @@ P1_LABEL1 = "layer 1"
 P1_LABEL2 = "defect 1"
 P1_LABEL3 = "Nt total"
 P1_LABEL4 = "nihil"
-DEFAULT_DENSITY_VOLUME_FROM = 1E15
+DEFAULT_DENSITY_VOLUME_FROM = 1E15 # vérifier la conversion cm^3 -> m^3
 DEFAULT_DENSITY_VOLUME_TO = 1E17
 DEFAULT_DENSITY_VOLUME_STEPS = 2
 
@@ -79,4 +79,5 @@ for interval in divided_intervals:
     BATCH_PARAMETERS.append([P0_subdivide, P1, P2])
 
 
-SETTINGS = combinaison_settings([300, 200], [100, 10, 1]) # Température (K) x Intensité (% de 1 sun)
+# SETTINGS = combinaison_settings([300, 200], [100, 10, 1]) # Température (K) x Intensité (% de 1 sun)
+SETTINGS = [(300, 100), (300, 10), (280, 100)] # Température (K) x Intensité (% de 1 sun)

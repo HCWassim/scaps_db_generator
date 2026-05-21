@@ -2,15 +2,142 @@ import re
 from typing import Tuple
 
 
+# def parse_iv_file(
+#     filepath: str,
+#     save_voltages: bool = True,
+#     save_currents: bool = True,
+# ) -> list[list[str]]:
+#     """
+#     Parse a SCAPS .iv batch file
+
+#     Returns a list of row. One pear simulation. Each row is :
+#     [V0, ..., Vn, I0, ..., In, Voc, Jsc, FF, eta, V_MPP, J_MPP, Temperature, batch_param 1, ..., batch_param M]
+
+#     """
+#     iv_re = re.compile(
+#         r'^\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'
+#         r'[\t ]+'
+#         r'(-?\d+\.\d+(?:[eE][+-]?\d+)?)'
+#     )
+#     param_re = {
+#         'Voc':   re.compile(r'^Voc\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+#         'Jsc':   re.compile(r'^Jsc\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+#         'FF':    re.compile(r'^FF\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+#         'eta':   re.compile(r'^eta\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+#         'V_MPP': re.compile(r'^V_MPP\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+#         'J_MPP': re.compile(r'^J_MPP\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
+#     }
+#     header_re      = re.compile(r'^\s*v\(V\)[\t ]')
+#     temperature_re = re.compile(r'^Temperature\s+(-?\d+\.\d+(?:[eE][+-]?\d+)?)\s+K')
+#     batch_param_re = re.compile(r'^(.+?)\s*:\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)\s*$')
+#     batch_section_re = re.compile(r'^\*\*Batch parameters\*\*')
+
+#     results = []
+
+#     # Variables "tampon" : remplies AVANT l'en-tête du tableau
+#     pending_temperature: str       = ''
+#     pending_batch_params: list[str] = []
+#     in_batch_section = False
+
+#     # Variables "courantes" : transférées depuis le tampon au moment de l'en-tête
+#     current_voltages: list[str]    = []
+#     current_currents: list[str]    = []
+#     current_params: dict[str, str] = {}
+#     current_temperature: str       = ''
+#     current_batch_params: list[str] = []
+#     in_iv_table = False
+
+#     def flush():
+#         if current_voltages and len(current_params) == 6:
+#             row = (
+#                 (current_voltages if save_voltages else [])
+#                 + (current_currents if save_currents else [])
+#                 + [current_params[k] for k in ('Voc', 'Jsc', 'FF', 'eta', 'V_MPP', 'J_MPP')]
+#                 + [current_temperature]
+#                 + current_batch_params
+#             )
+#             results.append(row)
+
+#     with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+#         for line in f:
+#             stripped = line.strip()
+
+#             # Température → tampon
+#             m = temperature_re.match(stripped)
+#             if m:
+#                 pending_temperature = m.group(1)
+#                 continue
+
+#             # Début section batch
+#             if batch_section_re.match(stripped):
+#                 in_batch_section = True
+#                 pending_batch_params = []   # reset du tampon à chaque nouvelle section
+#                 continue
+
+#             # Lecture batch params → tampon
+#             if in_batch_section:
+#                 if stripped == '':
+#                     in_batch_section = False
+#                     continue
+#                 m = batch_param_re.match(stripped)
+#                 if m:
+#                     pending_batch_params.append(m.group(2))
+#                     continue
+
+#             # En-tête tableau : flush simulation précédente,
+#             # puis transfert du tampon vers les variables courantes
+#             if header_re.match(line):
+#                 flush()
+#                 current_voltages     = []
+#                 current_currents     = []
+#                 current_params       = {}
+#                 current_temperature  = pending_temperature
+#                 current_batch_params = pending_batch_params
+#                 pending_temperature  = ''
+#                 pending_batch_params = []
+#                 in_iv_table          = True
+#                 in_batch_section     = False
+#                 continue
+
+#             if in_iv_table:
+#                 if stripped == '':
+#                     continue
+#                 m = iv_re.match(line)
+#                 if m:
+#                     current_voltages.append(m.group(1))
+#                     current_currents.append(m.group(2))
+#                     continue
+#                 else:
+#                     in_iv_table = False
+
+#             for key, pattern in param_re.items():
+#                 m = pattern.match(stripped)
+#                 if m:
+#                     current_params[key] = m.group(1)
+#                     break
+
+#     flush()
+#     return results
+
+
 def parse_iv_file(
     filepath: str,
     save_voltages: bool = True,
     save_currents: bool = True,
 ) -> list[list[str]]:
+    """
+    Parse a SCAPS .iv batch file (light or dark).
+
+    Returns a list of rows, one per simulation. Each row is:
+    [V0, ..., Vn, I0, ..., In, Voc, Jsc, FF, eta, V_MPP, J_MPP, Temperature, batch_param1, ..., batch_paramM]
+
+    For dark simulations, Voc/Jsc/FF/eta/V_MPP/J_MPP are set to '0'.
+    Only the first two columns (V, J) are kept from the IV table in all cases.
+    """
     iv_re = re.compile(
-        r'^\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'
+        r'^\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'   # voltage (col 1)
         r'[\t ]+'
-        r'(-?\d+\.\d+(?:[eE][+-]?\d+)?)'
+        r'(-?\d+\.\d+(?:[eE][+-]?\d+)?)'        # current (col 2)
     )
     param_re = {
         'Voc':   re.compile(r'^Voc\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
@@ -20,54 +147,74 @@ def parse_iv_file(
         'V_MPP': re.compile(r'^V_MPP\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
         'J_MPP': re.compile(r'^J_MPP\s*=\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'),
     }
-    header_re      = re.compile(r'^\s*v\(V\)[\t ]')
-    temperature_re = re.compile(r'^Temperature\s+(-?\d+\.\d+(?:[eE][+-]?\d+)?)\s+K')
-    batch_param_re = re.compile(r'^(.+?)\s*:\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)\s*$')
+    # Matches the IV table header: starts with "v(V)" possibly preceded by whitespace
+    header_re       = re.compile(r'^\s*v\(V\)[\t ]')
+    temperature_re  = re.compile(r'^Temperature\s+(-?\d+\.\d+(?:[eE][+-]?\d+)?)\s+K')
+    batch_param_re  = re.compile(r'^(.+?)\s*:\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)\s*$')
     batch_section_re = re.compile(r'^\*\*Batch parameters\*\*')
+    # Detect "Calculation in dark" line
+    dark_re         = re.compile(r'^Calculation\s+in\s+dark', re.IGNORECASE)
 
     results = []
 
-    # Variables "tampon" : remplies AVANT l'en-tête du tableau
-    pending_temperature: str       = ''
+    # --- pending (pre-header) state ---
+    pending_temperature: str        = ''
     pending_batch_params: list[str] = []
-    in_batch_section = False
+    pending_is_dark: bool           = False
+    in_batch_section: bool          = False
 
-    # Variables "courantes" : transférées depuis le tampon au moment de l'en-tête
-    current_voltages: list[str]    = []
-    current_currents: list[str]    = []
-    current_params: dict[str, str] = {}
-    current_temperature: str       = ''
+    # --- current (post-header) state ---
+    current_voltages: list[str]     = []
+    current_currents: list[str]     = []
+    current_params: dict[str, str]  = {}
+    current_temperature: str        = ''
     current_batch_params: list[str] = []
-    in_iv_table = False
+    current_is_dark: bool           = False
+    in_iv_table: bool               = False
 
     def flush():
-        if current_voltages and len(current_params) == 6:
-            row = (
-                (current_voltages if save_voltages else [])
-                + (current_currents if save_currents else [])
-                + [current_params[k] for k in ('Voc', 'Jsc', 'FF', 'eta', 'V_MPP', 'J_MPP')]
-                + [current_temperature]
-                + current_batch_params
-            )
-            results.append(row)
+        """Emit a row for the simulation accumulated so far."""
+        if not current_voltages:
+            return
+        # For dark simulations the solar-cell params are unavailable → use '0'
+        if current_is_dark:
+            solar_params = ['0', '0', '0', '0', '0', '0']
+        else:
+            if len(current_params) != 6:
+                return          # light sim but params incomplete – skip
+            solar_params = [current_params[k] for k in ('Voc', 'Jsc', 'FF', 'eta', 'V_MPP', 'J_MPP')]
+
+        row = (
+            (current_voltages if save_voltages else [])
+            + (current_currents if save_currents else [])
+            + solar_params
+            + [current_temperature]
+            + current_batch_params
+        )
+        results.append(row)
 
     with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
         for line in f:
             stripped = line.strip()
 
-            # Température → tampon
+            # ── Dark flag ────────────────────────────────────────────────────
+            if dark_re.match(stripped):
+                pending_is_dark = True
+                continue
+
+            # ── Temperature → pending buffer ─────────────────────────────────
             m = temperature_re.match(stripped)
             if m:
                 pending_temperature = m.group(1)
                 continue
 
-            # Début section batch
+            # ── Batch section start ───────────────────────────────────────────
             if batch_section_re.match(stripped):
-                in_batch_section = True
-                pending_batch_params = []   # reset du tampon à chaque nouvelle section
+                in_batch_section     = True
+                pending_batch_params = []   # reset for this simulation
                 continue
 
-            # Lecture batch params → tampon
+            # ── Batch params → pending buffer ────────────────────────────────
             if in_batch_section:
                 if stripped == '':
                     in_batch_section = False
@@ -77,8 +224,7 @@ def parse_iv_file(
                     pending_batch_params.append(m.group(2))
                     continue
 
-            # En-tête tableau : flush simulation précédente,
-            # puis transfert du tampon vers les variables courantes
+            # ── IV table header: flush previous sim, transfer pending → current ─
             if header_re.match(line):
                 flush()
                 current_voltages     = []
@@ -86,12 +232,16 @@ def parse_iv_file(
                 current_params       = {}
                 current_temperature  = pending_temperature
                 current_batch_params = pending_batch_params
+                current_is_dark      = pending_is_dark
+                # reset pending state
                 pending_temperature  = ''
                 pending_batch_params = []
+                pending_is_dark      = False
                 in_iv_table          = True
                 in_batch_section     = False
                 continue
 
+            # ── Inside IV table ───────────────────────────────────────────────
             if in_iv_table:
                 if stripped == '':
                     continue
@@ -101,15 +251,16 @@ def parse_iv_file(
                     current_currents.append(m.group(2))
                     continue
                 else:
-                    in_iv_table = False
+                    in_iv_table = False   # first non-numeric line ends the table
 
+            # ── Solar-cell params (light mode only) ───────────────────────────
             for key, pattern in param_re.items():
                 m = pattern.match(stripped)
                 if m:
                     current_params[key] = m.group(1)
                     break
 
-    flush()
+    flush()   # don't forget the last simulation
     return results
 
 

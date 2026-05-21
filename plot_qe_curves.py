@@ -16,7 +16,7 @@ def plot_qe_curves(chemin_fichier, n_points=61):
     n_points : int
         Nombre de points de mesure (longueurs d'onde). Par défaut 61.
     """
-    donnees = np.loadtxt(chemin_fichier, delimiter=",", ndmin=2)
+    donnees = np.loadtxt(chemin_fichier, delimiter=",", ndmin=2, skiprows=1)
 
     fig, ax = plt.subplots(figsize=(11, 7))  # Légèrement élargi pour la légende
 
