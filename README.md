@@ -24,7 +24,7 @@ For each parameter combination, SCAPS is invoked via a generated script, the res
 - Multicore parallelism: the surface defect density range is automatically split across all available CPU cores
 - Automatic script generation, simulation execution, and result parsing
 - Clean-up of temporary files after each run
-- I-V curve plotting utility
+- I-V and QE curve plotting utility
 - Configurable via a `.env` file — no hardcoded paths
 
 ---
@@ -44,6 +44,7 @@ scaps_db_generator/
 ├── db_generator.py         # Single-run dataset generation entry point
 ├── db_batch_generator.py   # Parallel/batch dataset generation entry point
 ├── plot_iv_curves.py       # I-V curve visualization
+├── plot_qe_curves.py       # QE curve visualization
 ├── utils.py                # Helper functions (interval splitting, etc.)
 ├── requirements.txt
 └── .env                    # Environment variables (not committed)
