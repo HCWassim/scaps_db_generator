@@ -48,8 +48,17 @@ P2_LABEL2 = "mu p"
 P2_LABEL3 = "nihil"
 P2_LABEL4 = "pure A material"
 HOLE_FROM = 1E1
-HOLE_TO = 3E1
+HOLE_TO = 4E1
 HOLE_STEPS = 2
+
+# Electron mobility :
+P3_LABEL1 = "layer 1"
+P3_LABEL2 = "mu n"
+P3_LABEL3 = "nihil"
+P3_LABEL4 = "pure A material"
+ELECTRON_FROM = 8E1
+ELECTRON_TO = 1.2E2
+ELECTRON_STEPS = 2
 
 
 def combinaison_settings(*settings):
@@ -74,10 +83,10 @@ divided_intervals = split_interval(DOPAGE_FROM, DOPAGE_TO, DOPAGE_STEPS, CORE)
 BATCH_PARAMETERS = []
 P1 = generate_batch_parameter(P1_LABEL1, P1_LABEL2, P1_LABEL3, P1_LABEL4, DEFAULT_DENSITY_VOLUME_FROM, DEFAULT_DENSITY_VOLUME_TO, DEFAULT_DENSITY_VOLUME_STEPS)
 P2 = generate_batch_parameter(P2_LABEL1, P2_LABEL2, P2_LABEL3, P2_LABEL4, HOLE_FROM, HOLE_TO, HOLE_STEPS)
+# P3 = generate_batch_parameter(P3_LABEL1, P3_LABEL2, P3_LABEL3, P3_LABEL4, ELECTRON_FROM, ELECTRON_TO, ELECTRON_STEPS)
 for interval in divided_intervals:
     P0_subdivide = generate_batch_parameter(P0_LABEL1, P0_LABEL2, P0_LABEL3, P0_LABEL4, interval["from"], interval["to"], interval["steps"])
     BATCH_PARAMETERS.append([P0_subdivide, P1, P2])
-
 
 # SETTINGS = combinaison_settings([300, 200], [100, 10, 1]) # Température (K) x Intensité (% de 1 sun)
 SETTINGS = [(300, 100), (300, 10), (280, 100)] # Température (K) x Intensité (% de 1 sun)
