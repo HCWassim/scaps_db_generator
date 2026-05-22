@@ -6,7 +6,7 @@
 
 ## Overview
 
-`scaps_db_generator` is a Python toolkit that automates the execution of **SCAPS-1D** simulations over a parametric space and aggregates the results into structured CSV datasets. It is designed to build large-scale databases of I-V curves for solar cells — useful for machine learning, sensitivity analysis, or device physics research.
+`scaps_db_generator` is a Python toolkit that automates the execution of **SCAPS-1D** simulations over a parametric space and aggregates the results into structured CSV datasets. It is designed to build large-scale databases of I-V curves for solar cells (useful for machine learning, sensitivity analysis, or device physics research.)
 
 The tool varies three key physical parameters across configurable ranges:
 

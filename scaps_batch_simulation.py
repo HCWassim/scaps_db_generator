@@ -1,7 +1,7 @@
 import os
 from parser import parse_iv_file, parse_qe_file
 from utils import scaps_execution
-from config import SCRIPT_NAME, BASELINE_NAME, BATCH_PATH, RESULTS_PATH
+from config import SCRIPT_NAME, BASELINE_NAME_V2, BATCH_PATH, RESULTS_PATH
 
 def generate_sbf_file(parameters, batch_name):
     """
@@ -47,7 +47,7 @@ def run_scaps_batch_simulation(simulation_name, batch_name, illumination="light"
 
     script_content = (
         # chargement des fichiers pour la simulation
-        f'load definitionfile {BASELINE_NAME}\n'
+        f'load definitionfile {BASELINE_NAME_V2}\n'
         f'load spectrumfile AM1_5G 1 sun.spe\n'
         f'load batchsettingsfile {batch_name}.sbf\n'
 

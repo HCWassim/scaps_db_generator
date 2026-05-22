@@ -3,7 +3,7 @@ import time
 import shutil
 import subprocess
 import multiprocessing
-from config import SCRIPT_PATH, SCAPS_PATH, DEF_PATH, BASELINE_NAME, BASELINE_PATH, CSV_DEF_PATH
+from config import SCRIPT_PATH, SCAPS_PATH, DEF_PATH, BASELINE_NAME_V2, BASELINE_PATH_V2, CSV_DEF_PATH
 from parser import parse_def_file
 
 def scaps_execution(script_name, script_content) :
@@ -55,15 +55,15 @@ def preparation_simulation():
     """
     prépare l'environnement de simulation
     """
-    destination = os.path.join(DEF_PATH, BASELINE_NAME)
-    baseline_scaps_insertion(BASELINE_PATH, destination)
+    destination = os.path.join(DEF_PATH, BASELINE_NAME_V2)
+    baseline_scaps_insertion(BASELINE_PATH_V2, destination)
 
 
 def post_simulation_cleanup():
     """
     nettoie l'environnement de simulation
     """
-    destination = os.path.join(DEF_PATH, BASELINE_NAME)
+    destination = os.path.join(DEF_PATH, BASELINE_NAME_V2)
     delete_file(destination)
 
 
@@ -94,7 +94,7 @@ def write_csv_file(results, path, id_def=None) :
         f.write(csv_line)
 
 
-def baseline_information(baseline_path=BASELINE_PATH, systemic_writing=False):
+def baseline_information(baseline_path=BASELINE_PATH_V2, systemic_writing=False):
     """
     Cette fonction : 
     - récupère les paramètres physiques de la baseline,

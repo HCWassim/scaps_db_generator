@@ -1,5 +1,5 @@
-> SCAPS 3.3.12 ELIS-UGent: Version scaps3312.exe, dated 03-06-2025, 15:37:06 Problem definition file
-> last saved by SCAPS: 	11-05-2026 at 16:35:48
+> SCAPS 3.3.12 ELIS-UGent: Version scaps3312.exe, dated 03-06-2025, 14:37:06 Problem definition file
+> last saved by SCAPS: 	22-05-2026 at 18:57:48
 > 
 > 
 > This problem definition file has been distributed with all SCAPS versions since SCAPS 2.0, 1998
@@ -55,20 +55,10 @@ c_p_auger :	 0.000000e+00	 0.000000e+00	 1.000000e+01	 1.000000e+01	 1.000000e+0
 Na(uniform) :	 2.858530e+22	 2.858530e+22	 5.500000e+21	 1.000000e+00	 1.000000e+00	 3.000000e+20	 3.000000e+20	 0	 2	[/m^3]
 Nd(uniform) :	 0.000000e+00	 0.000000e+00	 0.000000e+00	 1.000000e+00	 1.000000e+00	 0.000000e+00	 0.000000e+00	 0	 2	[/m^3]
 absorption grading :	 1192.29	  738.08	  250.00	  250.00	    0.00	    1.20	    1.20	 7	 0	[nm]
-absorptionmodel pure A material (y=0) : coefficients A and B (line inserted for compatibility with SCAPS until 3.3.06)
-A : 9.806e+06 [/(m*sqrt(eV))] (line inserted for compatibility with SCAPS until 3.3.06)
-B : 1.020e-10 [sqrt(eV)/m] (line inserted for compatibility with SCAPS until 3.3.06)
-absorptionmodel pure A material (y=0) : from model
-absorption model A, model : sqrt(hv-Eg) law (SCAPS traditional)
-absorption model A, value of parameter 1 :   1.000000e+05
-absorption model A, value of parameter 2 :   1.000000e-12
-absorption pure B material (y=1), model : coefficients A and B (line inserted for compatibility with SCAPS until 3.3.06)
-pure B material (y=1), A : 8.452e+06 [/(m*sqrt(eV))] (line inserted for compatibility with SCAPS until 3.3.06)
-pure B material (y=1), B : 1.296e-10 [sqrt(eV)/m] (line inserted for compatibility with SCAPS until 3.3.06)
-absorption pure B material (y=1), model : from model
-absorption model B, model : sqrt(hv-Eg) law (SCAPS traditional)
-absorption model B, value of parameter 1 :   1.095445e+05
-absorption model B, value of parameter 2 :   1.000000e-12
+absorptionmodel pure A material (y=0) : from file
+absorptionfile pure A material (y=0) : coeff_absorption_GGI=0.0_minoura_corr.abs
+absorption pure B material (y=1), model : from file
+absorption pure B material (y=1), file : coeff_absorption_GGI=1.0_minoura_corr.abs
 
 srhrecombination
 
@@ -179,13 +169,8 @@ c_p_auger :	 0.000000e+00	 0.000000e+00	 1.000000e+01	 1.000000e+01	 1.000000e+0
 Na(uniform) :	 0.000000e+00	 0.000000e+00	 0.000000e+00	 1.000000e+00	 1.000000e+00	 0.000000e+00	 0.000000e+00	 0	 2	[/m^3]
 Nd(uniform) :	 1.000000e+25	 1.000000e+25	 5.000000e+23	 1.000000e+00	 1.000000e+00	 1.000000e+25	 1.000000e+25	 0	 2	[/m^3]
 absorption grading :	  375.75	  364.70	  250.00	  250.00	    0.00	    1.20	    1.20	 7	 0	[nm]
-absorptionmodel pure A material (y=0) : coefficients A and B (line inserted for compatibility with SCAPS until 3.3.06)
-A : 1.015e+07 [/(m*sqrt(eV))] (line inserted for compatibility with SCAPS until 3.3.06)
-B : 0.000e+00 [sqrt(eV)/m] (line inserted for compatibility with SCAPS until 3.3.06)
-absorptionmodel pure A material (y=0) : from model
-absorption model A, model : sqrt(hv-Eg) law (SCAPS traditional)
-absorption model A, value of parameter 1 :   1.843909e+05
-absorption model A, value of parameter 2 :   0.000000e+00
+absorptionmodel pure A material (y=0) : from file
+absorptionfile pure A material (y=0) : abs_ZnO.abs
 absorption pure B material (y=1), model : coefficients A and B (line inserted for compatibility with SCAPS until 3.3.06)
 pure B material (y=1), A : 1.000e+07 [/(m*sqrt(eV))] (line inserted for compatibility with SCAPS until 3.3.06)
 pure B material (y=1), B : 0.000e+00 [sqrt(eV)/m] (line inserted for compatibility with SCAPS until 3.3.06)
