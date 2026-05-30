@@ -6,8 +6,8 @@ import time
 
 
 def run_and_return(parameters, illumination="light", temperature=300, intensity=100):
-    return run_batch(f"simu_{parameters[0]['startvalue']}", 
-                     f"batch_{parameters[0]['startvalue']}", 
+    return run_batch(f"simu_{parameters[1]['startvalue']}", 
+                     f"batch_{parameters[1]['startvalue']}", 
                      parameters, illumination, temperature, intensity)
 
 
@@ -38,8 +38,8 @@ if __name__ == "__main__":
     full_process(process_task_dark_1, id_def=f"0,{def_id}")
 
     # génération d'un cas particulier :
-    # process_task = partial(run_and_return, illumination="light", temperature=300, intensity=100)
-    # full_process(process_task, id_def=f"100,{def_id}")
+    # process_task = partial(run_and_return, illumination="dark", temperature=300, intensity=0)
+    # full_process(process_task, id_def=f"0,{def_id}")
 
     end_time = time.time()
     print(f"Temps de traitement : {end_time - start_time:.2f} secondes")

@@ -2,26 +2,53 @@ import os
 import time
 import shutil
 import subprocess
+import psutil
 import multiprocessing
 from config import SCRIPT_PATH, SCAPS_PATH, DEF_PATH, BASELINE_NAME_V2, BASELINE_PATH_V2, CSV_DEF_PATH
 from parser import parse_def_file
 
-def scaps_execution(script_name, script_content) :
+def scaps_execution(script_name, script_content):
     """
     Gestion de l'exécution de SCAPS à partir d'un script donné
-    :param script_name: nom du script à créer pour l'exécution de SCAPS
-    :param script_content: contenu du script à créer pour l'exécution de SCAPS
+    avec optimisation de la priorité CPU (Windows).
     """
     full_script_path = os.path.join(SCRIPT_PATH, script_name)
     with open(full_script_path, 'w') as script_file:
         script_file.write(script_content)
-    try :
+        
+    try:
         print(f"Exécution de SCAPS avec le script : {full_script_path}")
         SCAPS_DIR = os.path.dirname(SCAPS_PATH)
-        subprocess.run([SCAPS_PATH, full_script_path], cwd=SCAPS_DIR, check=True)
-        print("Simulation terminée")
-    except subprocess.CalledProcessError:
-        pass
+        
+        # 1. Lancement non-bloquant de SCAPS
+        # stdout/stderr branchés sur DEVNULL suppriment les ralentissements liés à l'affichage console
+        process = subprocess.Popen(
+            [SCAPS_PATH, full_script_path], 
+            cwd=SCAPS_DIR,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        
+        # 2. Attribution immédiate de la priorité Haute sous Windows
+        try:
+            p = psutil.Process(process.pid)
+            p.nice(psutil.HIGH_PRIORITY_CLASS)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            # Le processus a pu se terminer instantanément ou les droits sont restreints
+            pass
+
+        # 3. On attend que SCAPS termine sa simulation
+        return_code = process.wait()
+        
+        if return_code != 0:
+            print(f"SCAPS a retourné un code d'erreur : {return_code}")
+        else:
+            print("Simulation terminée")
+            
+    except Exception as e:
+        print(f"Erreur lors de l'exécution de SCAPS : {e}")
+        
+    # Nettoyage du script de commande
     if os.path.isfile(full_script_path):
         os.remove(full_script_path)
     else:
@@ -77,11 +104,15 @@ def run_multiprocess(process_task, parameters):
     preparation_simulation()
     start_time = time.time()
     print("Lancement du batch de simulations...")
+
     with multiprocessing.Pool() as pool:
         outputs = pool.map(process_task, parameters)
+    
     end_time = time.time()
     print(f"Temps de traitement : {end_time - start_time:.2f} secondes")
+    
     return outputs
+
 
 def write_csv_file(results, path, id_def=None) :
     csv_line = ""
