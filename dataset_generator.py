@@ -193,6 +193,7 @@ OUTPUT_PATH  = Path("./csv/dataset.csv")
 
 # ── Colonnes à conserver ──────────────────────────────────────────────────────
 KEY_COLS   = ["N_A", "N_t", "mu_h"]                      # clés de regroupement
+KEY_COLS_PLUS = ["N_A", "N_t", "mu_h", "T", "intensity"]
 I_COLS     = [f"I{i}"  for i in range(1, 86)]            # I1 … I85
 QE_COLS    = [f"QE{i}" for i in range(1, 62)]            # QE1 … QE61
 SCALAR_IV  = ["Voc", "Jsc", "FF", "eta", "V_MPP", "J_MPP", "T", "intensity", "ID_def"]
