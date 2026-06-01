@@ -25,7 +25,7 @@ CSV_DEF_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_DEF_PATH"))
 SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
 
 CORE = os.cpu_count() or 4
-BLOC = 3 # varie de 0 à 8
+BLOC = 4 # varie de 0 à 7
 
 # Dopage :
 P0_LABEL1 = "layer 1"
