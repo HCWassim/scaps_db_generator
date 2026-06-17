@@ -27,6 +27,24 @@ SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
 CORE = os.cpu_count() or 4
 BLOC = 7 # varie de 0 à 7
 
+# Résistance en série Rs :
+RS_LABEL1 = "Rs"
+RS_LABEL2 = "nihil"
+RS_LABEL3 = "nihil"
+RS_LABEL4 = "nihil"
+RS_FROM = 5E-1
+RS_TO = 1E1
+RS_STEPS = 2
+
+# Résistance en parallèle Rsh :
+RSH_LABEL1 = "Rsh"
+RSH_LABEL2 = "nihil"
+RSH_LABEL3 = "nihil"
+RSH_LABEL4 = "nihil"
+RSH_FROM = 1E2
+RSH_TO = 1E5
+RSH_STEPS = 2
+
 # Dopage :
 P0_LABEL1 = "layer 1"
 P0_LABEL2 = "NA"
@@ -34,7 +52,7 @@ P0_LABEL3 = "nihil"
 P0_LABEL4 = "nihil"
 DOPAGE_FROM = 1E15
 DOPAGE_TO = 1E17
-DOPAGE_STEPS = 24 # 24 ce soir
+DOPAGE_STEPS = 2 # 24 ce soir
 
 # Densité de défaut :
 P1_LABEL1 = "layer 1"
@@ -43,7 +61,7 @@ P1_LABEL3 = "Nt total"
 P1_LABEL4 = "nihil"
 DEFAULT_DENSITY_VOLUME_FROM = 1E15 # vérifier la conversion cm^3 -> m^3
 DEFAULT_DENSITY_VOLUME_TO = 1E17
-DEFAULT_DENSITY_VOLUME_STEPS = 24
+DEFAULT_DENSITY_VOLUME_STEPS = 2
 
 # Hole mobility :
 P2_LABEL1 = "layer 1"
@@ -52,7 +70,7 @@ P2_LABEL3 = "nihil"
 P2_LABEL4 = "pure A material"
 HOLE_FROM = 1E1
 HOLE_TO = 4E1
-HOLE_STEPS = 24
+HOLE_STEPS = 2
 
 # Electron mobility :
 P3_LABEL1 = "layer 1"
@@ -80,28 +98,30 @@ def generate_batch_parameter(label1, label2, label3, label4, from_val, to_val, s
     }
 
 # P0 - Dopage
-divided_intervals_p0 = split_interval(DOPAGE_FROM, DOPAGE_TO, DOPAGE_STEPS, CORE)
-multiples_blocs_de_calcul = chunk_intervals(divided_intervals_p0, n=8)
-blocs_de_calcul = multiples_blocs_de_calcul[BLOC][0]
+# divided_intervals_p0 = split_interval(DOPAGE_FROM, DOPAGE_TO, DOPAGE_STEPS, CORE)
+# multiples_blocs_de_calcul = chunk_intervals(divided_intervals_p0, n=8)
+# blocs_de_calcul = multiples_blocs_de_calcul[BLOC][0]
 
 # P1 - Densité de défaut
-divided_intervals_p1 = split_interval(DEFAULT_DENSITY_VOLUME_FROM, DEFAULT_DENSITY_VOLUME_TO, DEFAULT_DENSITY_VOLUME_STEPS, CORE)
+# divided_intervals_p1 = split_interval(DEFAULT_DENSITY_VOLUME_FROM, DEFAULT_DENSITY_VOLUME_TO, DEFAULT_DENSITY_VOLUME_STEPS, CORE)
 
 
 BATCH_PARAMETERS = []
-P0 = generate_batch_parameter(P0_LABEL1, P0_LABEL2, P0_LABEL3, P0_LABEL4, blocs_de_calcul["from"], blocs_de_calcul["to"], blocs_de_calcul["steps"])
+RS = generate_batch_parameter(RS_LABEL1, RS_LABEL2, RS_LABEL3, RS_LABEL4, RS_FROM, RS_TO, RS_STEPS)
+RSH = generate_batch_parameter(RSH_LABEL1, RSH_LABEL2, RSH_LABEL3, RSH_LABEL4, RSH_FROM, RSH_TO, RSH_STEPS)
+# P0 = generate_batch_parameter(P0_LABEL1, P0_LABEL2, P0_LABEL3, P0_LABEL4, blocs_de_calcul["from"], blocs_de_calcul["to"], blocs_de_calcul["steps"])
 P1 = generate_batch_parameter(P1_LABEL1, P1_LABEL2, P1_LABEL3, P1_LABEL4, DEFAULT_DENSITY_VOLUME_FROM, DEFAULT_DENSITY_VOLUME_TO, DEFAULT_DENSITY_VOLUME_STEPS)
 P2 = generate_batch_parameter(P2_LABEL1, P2_LABEL2, P2_LABEL3, P2_LABEL4, HOLE_FROM, HOLE_TO, HOLE_STEPS)
 P3 = generate_batch_parameter(P3_LABEL1, P3_LABEL2, P3_LABEL3, P3_LABEL4, ELECTRON_FROM, ELECTRON_TO, ELECTRON_STEPS)
 
 # cas pour multiprocess :
-for interval in divided_intervals_p1:
-    P1_subdivide = generate_batch_parameter(P1_LABEL1, P1_LABEL2, P1_LABEL3, P1_LABEL4, interval["from"], interval["to"], interval["steps"])
-    BATCH_PARAMETERS.append([P0, P1_subdivide, P2])
+# for interval in divided_intervals_p1:
+#     P1_subdivide = generate_batch_parameter(P1_LABEL1, P1_LABEL2, P1_LABEL3, P1_LABEL4, interval["from"], interval["to"], interval["steps"])
+#     BATCH_PARAMETERS.append([P0, P1_subdivide, P2])
 
 # cas pour singleprocess :
-# P0 = generate_batch_parameter(P0_LABEL1, P0_LABEL2, P0_LABEL3, P0_LABEL4, DOPAGE_FROM, DOPAGE_TO, DOPAGE_STEPS)
-# BATCH_PARAMETERS.append([P0, P1, P2])
+P0 = generate_batch_parameter(P0_LABEL1, P0_LABEL2, P0_LABEL3, P0_LABEL4, DOPAGE_FROM, DOPAGE_TO, DOPAGE_STEPS)
+BATCH_PARAMETERS.append([RS, RSH, P0, P1, P2, P3])
 
 # SETTINGS = combinaison_settings([300, 200], [100, 10, 1]) # Température (K) x Intensité (% de 1 sun)
 SETTINGS = [(300, 100), (280, 100), (300, 10)] # Température (K) x Intensité (% de 1 sun) #,

@@ -13,6 +13,7 @@ def generate_sbf_file(parameters, batch_name):
     blocks = [
         f"\n"
         f"Batch parameter {i} :\n"
+        f"\n"
         f"Label 1 : {param['label1']}\n"
         f"Label 2 : {param['label2']}\n"
         f"Label 3 : {param['label3']}\n"
@@ -69,7 +70,8 @@ def run_scaps_batch_simulation(simulation_name, batch_name, illumination="light"
         # f'action qe.points 85\n'
 
         # valeur des paramètres fixes
-        f'set external.Rs 1E-30\n' # résistance série
+        # f'set external.Rs {Rs}\n' # résistance série
+        # f'set external.Rsh {Rsh}\n' # résistance parallèle
         # f'set layer1.Eg 1.55\n' # bandgap
         
         # obtention des résultats

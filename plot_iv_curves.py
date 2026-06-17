@@ -1,6 +1,56 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
+
+def verifier_coherence_csv(chemin_fichier):
+    lignes_valides = 0
+    lignes_invalides = 0
+    erreurs = []
+
+    try:
+        with open(chemin_fichier, mode="r", encoding="utf-8") as fichier:
+            # reader permet de lire le CSV ligne par ligne sous forme de liste
+            lecteur = csv.reader(fichier)
+
+            # On récupère l'en-tête et on compte ses colonnes
+            try:
+                en_tete = next(lecteur)
+                nb_colonnes_reference = len(en_tete)
+            except StopIteration:
+                print("Le fichier CSV est vide.")
+                return
+
+            # Vérification des lignes suivantes (le lecteur commence à la ligne 2)
+            # lecteur.line_num donne le vrai numéro de ligne dans le fichier
+            for ligne in lecteur:
+                # Si la ligne est vide, on passe (optionnel, selon tes besoins)
+                if not ligne:
+                    continue
+
+                if len(ligne) == nb_colonnes_reference:
+                    lignes_valides += 1
+                else:
+                    lignes_invalides += 1
+                    erreurs.append(
+                        f"Ligne {lecteur.line_num} : {len(ligne)} colonnes (attendu : {nb_colonnes_reference})"
+                    )
+
+        # Affichage des résultats
+        print("--- Résultat de la vérification ---")
+        print(f"Nombre de colonnes attendu (en-tête) : {nb_colonnes_reference}")
+        print(f"Nombre de lignes conformes : {lignes_valides}")
+        print(f"Nombre de lignes incorrectes : {lignes_invalides}")
+
+        if lignes_invalides > 0:
+            print("\nDétail des anomalies (10 premières max) :")
+            for erreur in erreurs[:10]:
+                print(f"  - {erreur}")
+
+    except FileNotFoundError:
+        print(f"Erreur : Le fichier '{chemin_fichier}' est introuvable.")
+    except Exception as e:
+        print(f"Une erreur est survenue : {e}")
 
 
 def plot_iv_curves(chemin_fichier, n_points=None):
@@ -23,24 +73,25 @@ def plot_iv_curves(chemin_fichier, n_points=None):
     fig, ax = plt.subplots(figsize=(11, 7))
 
     for idx, ligne in enumerate(donnees):
-        # Déduction du nombre de points : on retire les 6 indicateurs IV + 5 physiques + 1 id = 12
-        n = n_points if n_points is not None else (len(ligne) - 13) // 2
+        # Déduction du nombre de points : on retire les 6 indicateurs IV + 8 physiques + 1 id = 15
+        n = n_points if n_points is not None else (len(ligne) - 15) // 2
 
         V = ligne[:n]
         I = ligne[n : 2 * n]
 
         # Récupération des 4 derniers éléments de la ligne complète
-        param_physiques = ligne[-6:]
+        param_physiques = ligne[-9:]
 
         if idx < 40:
             if len(ligne) >= (2 * n) + 4:
-                T, N_A, N_t, mu_h,_,_ = param_physiques
+                T, _, _, N_A, N_t, mu_h, mu_n, _, _ = param_physiques
                 # Label combinant le numéro de simulation et les paramètres physiques
                 label_courbe = (
                     f"Sim {idx+1} ($T$={T:.0f}K, "
                     f"$N_A$={N_A:.1e}, "
                     f"$N_t$={N_t:.1e}, "
-                    f"$\\mu_h$={mu_h:.1f})"
+                    f"$\\mu_h$={mu_h:.1f}, "
+                    f"$\\mu_n$={mu_n:.1f})"
                 )
             else:
                 label_courbe = f"Sim {idx+1}"
@@ -80,3 +131,4 @@ def plot_iv_curves(chemin_fichier, n_points=None):
 
 
 plot_iv_curves(r"./csv/iv_curve.csv")
+# verifier_coherence_csv(r"./csv/iv_curve.csv")
