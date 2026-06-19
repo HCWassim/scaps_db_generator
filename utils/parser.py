@@ -442,6 +442,11 @@ def parse_iv_file(
     For dark simulations, Voc/Jsc/FF/eta/V_MPP/J_MPP are set to '0'.
     Only the first two columns (V, J) are kept from the IV table in all cases.
     """
+    # iv_re = re.compile(
+    #     r'^\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)'   # Tension (col 1)
+    #     r'[\t ]+'                              # <--- Échoue ici à cause du '*'
+    #     r'(-?\d+\.\d+(?:[eE][+-]?\d+)?)'        # Courant (col 2)
+    # )
     iv_re = re.compile(
         r'^\s*(-?\d+\.\d+(?:[eE][+-]?\d+)?)\*?' # Ajout de \*? pour l'astérisque optionnel
         r'[\t ]+'

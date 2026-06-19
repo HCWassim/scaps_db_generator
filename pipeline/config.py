@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from interval import split_interval, chunk_intervals
+from utils.interval import split_interval, chunk_intervals, format_sci
 from itertools import product
 
 load_dotenv()
@@ -20,6 +20,7 @@ BASELINE_NAME_V2 = os.getenv("BASELINE_FILENAME_V2")
 BASELINE_PATH = os.path.join(BASELINE_DIR, BASELINE_NAME)
 BASELINE_PATH_V2 = os.path.join(BASELINE_DIR, BASELINE_NAME_V2)
 CSV_IV_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_IV_PATH"))
+CSV_IV_PROCESSED_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_IV_PROCESSED_PATH"))
 CSV_QE_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_QE_PATH"))
 CSV_DEF_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_DEF_PATH"))
 SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
@@ -33,17 +34,8 @@ RS_LABEL2 = "nihil"
 RS_LABEL3 = "nihil"
 RS_LABEL4 = "nihil"
 RS_FROM = 5E-1
-RS_TO = 1E1
+RS_TO = 5E0
 RS_STEPS = 2
-
-# Résistance en parallèle Rsh :
-RSH_LABEL1 = "Rsh"
-RSH_LABEL2 = "nihil"
-RSH_LABEL3 = "nihil"
-RSH_LABEL4 = "nihil"
-RSH_FROM = 1E2
-RSH_TO = 1E5
-RSH_STEPS = 2
 
 # Dopage :
 P0_LABEL1 = "layer 1"
@@ -108,7 +100,6 @@ def generate_batch_parameter(label1, label2, label3, label4, from_val, to_val, s
 
 BATCH_PARAMETERS = []
 RS = generate_batch_parameter(RS_LABEL1, RS_LABEL2, RS_LABEL3, RS_LABEL4, RS_FROM, RS_TO, RS_STEPS)
-RSH = generate_batch_parameter(RSH_LABEL1, RSH_LABEL2, RSH_LABEL3, RSH_LABEL4, RSH_FROM, RSH_TO, RSH_STEPS)
 # P0 = generate_batch_parameter(P0_LABEL1, P0_LABEL2, P0_LABEL3, P0_LABEL4, blocs_de_calcul["from"], blocs_de_calcul["to"], blocs_de_calcul["steps"])
 P1 = generate_batch_parameter(P1_LABEL1, P1_LABEL2, P1_LABEL3, P1_LABEL4, DEFAULT_DENSITY_VOLUME_FROM, DEFAULT_DENSITY_VOLUME_TO, DEFAULT_DENSITY_VOLUME_STEPS)
 P2 = generate_batch_parameter(P2_LABEL1, P2_LABEL2, P2_LABEL3, P2_LABEL4, HOLE_FROM, HOLE_TO, HOLE_STEPS)
@@ -121,7 +112,8 @@ P3 = generate_batch_parameter(P3_LABEL1, P3_LABEL2, P3_LABEL3, P3_LABEL4, ELECTR
 
 # cas pour singleprocess :
 P0 = generate_batch_parameter(P0_LABEL1, P0_LABEL2, P0_LABEL3, P0_LABEL4, DOPAGE_FROM, DOPAGE_TO, DOPAGE_STEPS)
-BATCH_PARAMETERS.append([RS, RSH, P0, P1, P2, P3])
+BATCH_PARAMETERS.append([RS, P0, P1, P2, P3])
 
-# SETTINGS = combinaison_settings([300, 200], [100, 10, 1]) # Température (K) x Intensité (% de 1 sun)
-SETTINGS = [(300, 100), (280, 100), (300, 10)] # Température (K) x Intensité (% de 1 sun) #,
+# Température (K) x Intensité (% de 1 sun) x Rsh (Ohm.cm²)
+SETTINGS = [(300, 100, 1E2), (280, 100, 1E2), (300, 10, 1E2), (300, 0, 1E2),
+            (300, 100, 1E5), (280, 100, 1E5), (300, 10, 1E5), (300, 0, 1E5)]

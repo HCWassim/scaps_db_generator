@@ -82,9 +82,9 @@ def plot_iv_curves(chemin_fichier, n_points=None):
         # Récupération des 4 derniers éléments de la ligne complète
         param_physiques = ligne[-9:]
 
-        if idx < 40:
+        if idx < 5:
             if len(ligne) >= (2 * n) + 4:
-                T, _, _, N_A, N_t, mu_h, mu_n, _, _ = param_physiques
+                T, _, N_A, N_t, mu_h, mu_n, _, _, _ = param_physiques
                 # Label combinant le numéro de simulation et les paramètres physiques
                 label_courbe = (
                     f"Sim {idx+1} ($T$={T:.0f}K, "
@@ -130,5 +130,5 @@ def plot_iv_curves(chemin_fichier, n_points=None):
     print(f"Graphique sauvegardé ({len(donnees)} courbe(s)) : {nom_image}")
 
 
-plot_iv_curves(r"./csv/iv_curve.csv")
+plot_iv_curves(r"./csv/iv_curve_processed.csv")
 # verifier_coherence_csv(r"./csv/iv_curve.csv")

@@ -1,7 +1,7 @@
 import os
-from parser import parse_iv_file, parse_qe_file
-from utils import scaps_execution
-from config import SCRIPT_NAME, BASELINE_NAME_V2, BATCH_PATH, RESULTS_PATH
+from utils.parser import parse_iv_file, parse_qe_file
+from utils.utils import scaps_execution
+from pipeline.config import SCRIPT_NAME, BASELINE_NAME_V2, BATCH_PATH, RESULTS_PATH
 
 def generate_sbf_file(parameters, batch_name):
     """
@@ -37,7 +37,7 @@ def generate_sbf_file(parameters, batch_name):
         return False
 
 
-def run_scaps_batch_simulation(simulation_name, batch_name, illumination="light", temperature=300, intensity=100):
+def run_scaps_batch_simulation(simulation_name, batch_name, illumination="light", temperature=300, intensity=100, Rsh=1E2, singleshot=False):
     """
     exécute la simulation de scaps en utilisant le script généré
     :param simulation_name: nom du fichier de résultat de la simulation
@@ -45,6 +45,7 @@ def run_scaps_batch_simulation(simulation_name, batch_name, illumination="light"
     if illumination not in ["light", "dark"]:
         raise ValueError("L'illumination doit être 'light' ou 'dark'.")
     qe = 1 if illumination == "light" else 0
+    type = "singleshot" if singleshot else "batch"
 
     script_content = (
         # chargement des fichiers pour la simulation
@@ -70,12 +71,12 @@ def run_scaps_batch_simulation(simulation_name, batch_name, illumination="light"
         # f'action qe.points 85\n'
 
         # valeur des paramètres fixes
-        # f'set external.Rs {Rs}\n' # résistance série
-        # f'set external.Rsh {Rsh}\n' # résistance parallèle
+        f'set external.Rs 1E-13\n' # résistance série
+        f'set external.Rsh {Rsh}\n' # résistance parallèle
         # f'set layer1.Eg 1.55\n' # bandgap
         
         # obtention des résultats
-        f'calculate batch\n'
+        f'calculate {type}\n'
 
         f'save results.iv batch_{simulation_name}.iv\n'
         f'save results.qe batch_{simulation_name}.qe\n'
@@ -86,9 +87,9 @@ def run_scaps_batch_simulation(simulation_name, batch_name, illumination="light"
     scaps_execution(script_name, script_content)
 
 
-def run_batch(simulation_name, batch_name, batch_parameters, illumination="light", temperature=80, intensity=100):
+def run_batch(simulation_name, batch_name, batch_parameters, illumination="light", temperature=300, intensity=100, Rsh=1E2, singleshot=False):
     generate_sbf_file(batch_parameters, batch_name)
-    run_scaps_batch_simulation(simulation_name, batch_name, illumination, temperature, intensity)
+    run_scaps_batch_simulation(simulation_name, batch_name, illumination, temperature, intensity, Rsh, singleshot)
     full_batch_path = os.path.join(BATCH_PATH, f"{batch_name}.sbf")
     full_results_iv_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.iv")
     full_results_qe_path = os.path.join(RESULTS_PATH, f"batch_{simulation_name}.qe")

@@ -1,4 +1,4 @@
-from config import CSV_IV_PATH, CSV_QE_PATH
+from pipeline.config import CSV_IV_PROCESSED_PATH, CSV_IV_PATH, CSV_QE_PATH
 import pandas as pd
 
 import numpy as np
@@ -12,7 +12,7 @@ OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 I_COLS      = [f"I{i}"      for i in range(1, 86)]   # I1 … I85
 QE_COLS     = [f"QE{i}"     for i in range(1, 62)]   # QE1 … QE61
 IV_EXTRA    = ["Voc", "Jsc", "FF", "eta", "V_MPP", "J_MPP"]
-SHARED_KEYS = ["N_A", "N_t", "mu_h"]
+SHARED_KEYS = ["Rs", "Rsh", "N_A", "N_t", "mu_h", "mu_n"]
 COND_COLS   = ["T", "intensity"]
 ID_COL      = ["ID_def"]
  
@@ -30,8 +30,8 @@ CASES = {
 CASES_WITH_QE = {"A", "B", "C"}   # D n'a pas de courbe QE
  
 # Lecture 
-print(f"Lecture de {CSV_IV_PATH} …")
-iv_df = pd.read_csv(CSV_IV_PATH)
+print(f"Lecture de {CSV_IV_PROCESSED_PATH} …")
+iv_df = pd.read_csv(CSV_IV_PROCESSED_PATH)
  
 print(f"Lecture de {CSV_QE_PATH} …")
 qe_df = pd.read_csv(CSV_QE_PATH)

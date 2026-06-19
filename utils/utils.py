@@ -4,8 +4,8 @@ import shutil
 import subprocess
 import psutil
 import multiprocessing
-from config import SCRIPT_PATH, SCAPS_PATH, DEF_PATH, BASELINE_NAME_V2, BASELINE_PATH_V2, CSV_DEF_PATH
-from parser import parse_def_file
+from pipeline.config import SCRIPT_PATH, SCAPS_PATH, DEF_PATH, BASELINE_NAME_V2, BASELINE_PATH_V2, CSV_DEF_PATH
+from utils.parser import parse_def_file
 
 def scaps_execution(script_name, script_content):
     """
