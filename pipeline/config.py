@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from utils.interval import split_interval, chunk_intervals, format_sci
+from outil.interval import split_interval, chunk_intervals, format_sci
 from itertools import product
 
 load_dotenv()
@@ -21,6 +21,7 @@ BASELINE_PATH = os.path.join(BASELINE_DIR, BASELINE_NAME)
 BASELINE_PATH_V2 = os.path.join(BASELINE_DIR, BASELINE_NAME_V2)
 CSV_IV_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_IV_PATH"))
 CSV_IV_PROCESSED_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_IV_PROCESSED_PATH"))
+CSV_IV_NO_RS_RSH_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_IV_NO_RS_RSH_PATH"))
 CSV_QE_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_QE_PATH"))
 CSV_DEF_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_DEF_PATH"))
 SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
@@ -115,5 +116,5 @@ P0 = generate_batch_parameter(P0_LABEL1, P0_LABEL2, P0_LABEL3, P0_LABEL4, DOPAGE
 BATCH_PARAMETERS.append([RS, P0, P1, P2, P3])
 
 # Température (K) x Intensité (% de 1 sun) x Rsh (Ohm.cm²)
-SETTINGS = [(300, 100, 1E2), (280, 100, 1E2), (300, 10, 1E2), (300, 0, 1E2),
+SETTINGS = [(300, 100, 1E3), (280, 100, 1E3), (300, 10, 1E3), (300, 0, 1E3),
             (300, 100, 1E5), (280, 100, 1E5), (300, 10, 1E5), (300, 0, 1E5)]

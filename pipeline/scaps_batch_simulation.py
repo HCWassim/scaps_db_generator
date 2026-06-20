@@ -1,6 +1,6 @@
 import os
-from utils.parser import parse_iv_file, parse_qe_file
-from utils.utils import scaps_execution
+from outil.parser import parse_iv_file, parse_qe_file
+from outil.utils import scaps_execution
 from pipeline.config import SCRIPT_NAME, BASELINE_NAME_V2, BATCH_PATH, RESULTS_PATH
 
 def generate_sbf_file(parameters, batch_name):

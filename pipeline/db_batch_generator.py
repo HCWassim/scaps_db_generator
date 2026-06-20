@@ -1,5 +1,5 @@
 from pipeline.config import BATCH_PARAMETERS, CSV_IV_PATH, CSV_QE_PATH, SETTINGS
-from utils.utils import preparation_simulation, post_simulation_cleanup, delete_file, run_multiprocess, write_csv_file, baseline_information
+from outil.utils import preparation_simulation, post_simulation_cleanup, delete_file, run_multiprocess, write_csv_file, baseline_information
 from pipeline.scaps_batch_simulation import run_batch
 from functools import partial
 import time

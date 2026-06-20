@@ -1,4 +1,4 @@
-from pipeline.config import CSV_IV_PROCESSED_PATH, CSV_IV_PATH, CSV_QE_PATH
+from config import CSV_IV_PROCESSED_PATH, CSV_IV_PATH, CSV_QE_PATH
 import pandas as pd
 
 import numpy as np

@@ -1,3 +1,7 @@
 explication_git.txt
 .env
 __pycache__
+db_generation/csv/
+.gitattributes
+.vscode
+.venv

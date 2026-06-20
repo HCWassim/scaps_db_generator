@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy.interpolate import PchipInterpolator
+from pipeline.config import CSV_IV_NO_RS_RSH_PATH
 
 INPUT = './csv/iv_curve.csv'
 OUTPUT = './csv/iv_curve_processed.csv'
