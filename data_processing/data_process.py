@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 from scipy.interpolate import PchipInterpolator
-from pipeline.config import CSV_IV_NO_RS_RSH_PATH
+from pipeline.config import CSV_IV_PATH, CSV_IV_PROCESSED_PATH, CSV_IV_NO_RS_RSH_PATH
 
-INPUT = './csv/iv_curve.csv'
-OUTPUT = './csv/iv_curve_processed.csv'
+INPUT = CSV_IV_PATH
+OUTPUT = CSV_IV_PROCESSED_PATH
 
 TARGET_V = np.array([
 -0.500000,-0.479762,-0.459524,-0.439286,-0.419048,-0.398810,-0.378571,-0.358333,-0.338095,-0.317857,

@@ -36,7 +36,7 @@ RS_LABEL3 = "nihil"
 RS_LABEL4 = "nihil"
 RS_FROM = 5E-1
 RS_TO = 5E0
-RS_STEPS = 2
+RS_STEPS = 10
 
 # Dopage :
 P0_LABEL1 = "layer 1"
@@ -45,7 +45,7 @@ P0_LABEL3 = "nihil"
 P0_LABEL4 = "nihil"
 DOPAGE_FROM = 1E15
 DOPAGE_TO = 1E17
-DOPAGE_STEPS = 2 # 24 ce soir
+DOPAGE_STEPS = 16
 
 # Densité de défaut :
 P1_LABEL1 = "layer 1"
@@ -54,7 +54,7 @@ P1_LABEL3 = "Nt total"
 P1_LABEL4 = "nihil"
 DEFAULT_DENSITY_VOLUME_FROM = 1E15 # vérifier la conversion cm^3 -> m^3
 DEFAULT_DENSITY_VOLUME_TO = 1E17
-DEFAULT_DENSITY_VOLUME_STEPS = 2
+DEFAULT_DENSITY_VOLUME_STEPS = 16
 
 # Hole mobility :
 P2_LABEL1 = "layer 1"
@@ -63,7 +63,7 @@ P2_LABEL3 = "nihil"
 P2_LABEL4 = "pure A material"
 HOLE_FROM = 1E1
 HOLE_TO = 4E1
-HOLE_STEPS = 2
+HOLE_STEPS = 8
 
 # Electron mobility :
 P3_LABEL1 = "layer 1"
@@ -72,7 +72,7 @@ P3_LABEL3 = "nihil"
 P3_LABEL4 = "pure A material"
 ELECTRON_FROM = 8E1
 ELECTRON_TO = 1.2E2
-ELECTRON_STEPS = 2
+ELECTRON_STEPS = 8
 
 
 def combinaison_settings(*settings):
@@ -117,4 +117,13 @@ BATCH_PARAMETERS.append([RS, P0, P1, P2, P3])
 
 # Température (K) x Intensité (% de 1 sun) x Rsh (Ohm.cm²)
 SETTINGS = [(300, 100, 1E3), (280, 100, 1E3), (300, 10, 1E3), (300, 0, 1E3),
-            (300, 100, 1E5), (280, 100, 1E5), (300, 10, 1E5), (300, 0, 1E5)]
+            (300, 100, 1.2E4), (280, 100, 1.2E4), (300, 10, 1.2E4), (300, 0, 1.2E4),
+            (300, 100, 2.3E4), (280, 100, 2.3E4), (300, 10, 2.3E4), (300, 0, 2.3E4),
+            (300, 100, 3.4E4), (280, 100, 3.4E4), (300, 10, 3.4E4), (300, 0, 3.4E4),
+            (300, 100, 4.5E4), (280, 100, 4.5E4), (300, 10, 4.5E4), (300, 0, 4.5E4),
+            (300, 100, 5.6E4), (280, 100, 5.6E4), (300, 10, 5.6E4), (300, 0, 5.6E4),
+            (300, 100, 6.7E4), (280, 100, 6.7E4), (300, 10, 6.7E4), (300, 0, 6.7E4),
+            (300, 100, 7.8E4), (280, 100, 7.8E4), (300, 10, 7.8E4), (300, 0, 7.8E4),
+            (300, 100, 8.9E4), (280, 100, 8.9E4), (300, 10, 8.9E4), (300, 0, 8.9E4),
+            (300, 100, 1E5), (280, 100, 1E5), (300, 10, 1E5), (300, 0, 1E5)
+    ]
