@@ -20,7 +20,7 @@ def generate_sbf_file(parameters, batch_name):
         f"Label 4 : {param['label4']}\n"
         f"simultaneous :  0\n"
         f"values from a list :  0\n"
-        f"logarithmic variation :  0\n"
+        f"logarithmic variation :  {param['log']}\n"
         f"startvalue :   {param['startvalue']}\n"
         f"stopvalue :   {param['stopvalue']}\n"
         f"number of steps :   {param['steps']}\n"

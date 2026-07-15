@@ -59,8 +59,10 @@ if __name__ == "__main__":
         # génération de l'ensemble des cas :
         for temp, intensity, rsh in SETTINGS:
             if intensity :
+                print("this case", temp, intensity, rsh)
                 process_task = partial(run_and_return, illumination="light", temperature=temp, intensity=intensity, Rsh=rsh, singleshot=False)
             else :
+                print("this one", temp, intensity, rsh)
                 process_task = partial(run_and_return, illumination="dark", temperature=temp, intensity=intensity, Rsh=rsh, singleshot=False)
             full_process_multi(process_task, id_def=f"{intensity},{rsh},{def_id}")
 

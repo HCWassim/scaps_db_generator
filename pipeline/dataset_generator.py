@@ -12,7 +12,7 @@ OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 I_COLS      = [f"I{i}"      for i in range(1, 86)]   # I1 … I85
 QE_COLS     = [f"QE{i}"     for i in range(1, 62)]   # QE1 … QE61
 IV_EXTRA    = ["Voc", "Jsc", "FF", "eta", "V_MPP", "J_MPP"]
-SHARED_KEYS = ["Rs", "Rsh", "N_A", "N_t", "mu_h", "mu_n"]
+SHARED_KEYS = ["Rs", "Rsh", "N_A", "N_t", "mu_h", "mu_n", "Nt_interface"]
 COND_COLS   = ["T", "intensity"]
 ID_COL      = ["ID_def"]
  
@@ -41,6 +41,8 @@ for df in (iv_df, qe_df):
     df["N_A"]       = pd.to_numeric(df["N_A"],       errors="coerce")
     df["N_t"]       = pd.to_numeric(df["N_t"],       errors="coerce")
     df["mu_h"]      = pd.to_numeric(df["mu_h"],      errors="coerce")
+    df["mu_n"]      = pd.to_numeric(df["mu_n"],      errors="coerce")
+    df["Nt_interface"] = pd.to_numeric(df["Nt_interface"], errors="coerce")
     df["T"]         = pd.to_numeric(df["T"],         errors="coerce")
     df["intensity"] = pd.to_numeric(df["intensity"], errors="coerce")
  
@@ -60,12 +62,20 @@ for _, params in param_groups.iterrows():
     mask_params_iv = (
         (iv_df["N_A"]  == params["N_A"]) &
         (iv_df["N_t"]  == params["N_t"]) &
-        (iv_df["mu_h"] == params["mu_h"])
+        (iv_df["mu_h"] == params["mu_h"]) &
+        (iv_df["mu_n"] == params["mu_n"]) &
+        (iv_df["Nt_interface"] == params["Nt_interface"]) &
+        (iv_df["Rs"] == params["Rs"]) &
+        (iv_df["Rsh"] == params["Rsh"])
     )
     mask_params_qe = (
         (qe_df["N_A"]  == params["N_A"]) &
         (qe_df["N_t"]  == params["N_t"]) &
-        (qe_df["mu_h"] == params["mu_h"])
+        (qe_df["mu_h"] == params["mu_h"]) &
+        (qe_df["mu_n"] == params["mu_n"]) &
+        (qe_df["Nt_interface"] == params["Nt_interface"]) &
+        (qe_df["Rs"] == params["Rs"]) &
+        (qe_df["Rsh"] == params["Rsh"])
     )
  
     row_dict = {}
