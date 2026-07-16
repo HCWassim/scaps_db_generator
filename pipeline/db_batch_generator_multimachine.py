@@ -31,7 +31,7 @@ import traceback
 from pipeline.config import SETTINGS, CSV_IV_PATH, CSV_QE_PATH
 from pipeline.machine_split import (
     get_machine_parameters, combos_in,
-    N_MACHINES, RS_SPLIT, P0_SPLIT, P1_SESSION_SPLIT,
+    N_MACHINES_TARGET
 )
 from pipeline.scaps_batch_simulation import run_batch
 from outil.utils import (
@@ -43,7 +43,7 @@ MACHINE_ID = os.getenv("MACHINE_ID")
 if MACHINE_ID is None:
     raise EnvironmentError(
         "MACHINE_ID n'est pas défini dans le .env de cette machine. "
-        f"Chaque PC doit avoir une valeur unique entre 0 et {N_MACHINES - 1}."
+        f"Chaque PC doit avoir une valeur unique entre 0 et {N_MACHINES_TARGET - 1}."
     )
 MACHINE_ID = int(MACHINE_ID)
 
@@ -79,8 +79,7 @@ if __name__ == "__main__":
     combos_par_session = combos_in(sessions[0])
     combos_par_machine = combos_par_session * len(sessions)
 
-    print(f"=== Machine {MACHINE_ID}/{N_MACHINES - 1} "
-          f"(RS_SPLIT={RS_SPLIT}, P0_SPLIT={P0_SPLIT}, P1_SESSION_SPLIT={P1_SESSION_SPLIT}) ===")
+    print(f"=== Machine {MACHINE_ID}/{N_MACHINES_TARGET - 1} ")
     print(f"Combinaisons/session : {combos_par_session}")
     print(f"Sessions/machine     : {len(sessions)}")
     print(f"Combinaisons/machine : {combos_par_machine}")

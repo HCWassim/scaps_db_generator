@@ -21,7 +21,7 @@ for machine_id in range(N_MACHINES):
     print(f"MACHINE_ID={machine_id}")
     print(f"OUTPUT_CSV_IV_PATH=./csv/iv_curve.csv")
     print(f"OUTPUT_CSV_IV_PROCESSED_PATH=./csv/iv_curve_processed.csv")
-    print(f"OUTPUT_CSV_QE_PATH=./csv/qe.csv")
+    print(f"OUTPUT_CSV_QE_PATH=./csv/qe_curve.csv")
     print()
 
 # Note : les chemins ci-dessus sont volontairement IDENTIQUES sur les 40 PC
