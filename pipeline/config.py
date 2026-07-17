@@ -27,6 +27,15 @@ print(f"CSV_QE_PATH: {CSV_QE_PATH}")
 CSV_DEF_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_DEF_PATH"))
 SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
 
+# Création automatique des dossiers de sortie s'ils n'existent pas
+def _ensure_dir(path):
+    d = os.path.dirname(path)
+    if d:
+        os.makedirs(d, exist_ok=True)
+
+for _p in (CSV_IV_PATH, CSV_IV_PROCESSED_PATH, CSV_IV_NO_RS_RSH_PATH, CSV_QE_PATH, CSV_DEF_PATH):
+    _ensure_dir(_p)
+
 CORE = os.cpu_count() or 4
 BLOC = 7 # varie de 0 à 7
 
