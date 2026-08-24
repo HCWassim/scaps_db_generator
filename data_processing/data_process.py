@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 from pipeline.config import CSV_IV_PATH, CSV_IV_PROCESSED_PATH, CSV_IV_NO_RS_RSH_PATH
+from outil.headers import iv_header
 
 INPUT = CSV_IV_PATH
 OUTPUT = CSV_IV_PROCESSED_PATH
@@ -19,8 +20,11 @@ TARGET_V = np.array([
 ])
 assert len(TARGET_V) == 85, len(TARGET_V)
 
-df = pd.read_csv(INPUT)
+df = pd.read_csv(INPUT, header=None)
 n = len(df)
+
+header_str = iv_header()
+df.columns = [col.strip() for col in header_str.split(',')]
 
 Vcols = [f'V{i}' for i in range(1, 86)]
 Icols = [f'I{i}' for i in range(1, 86)]

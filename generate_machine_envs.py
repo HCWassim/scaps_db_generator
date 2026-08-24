@@ -22,6 +22,7 @@ for machine_id in range(N_MACHINES):
     print(f'OUTPUT_CSV_IV_PATH="Z:/data_scaps/csv/machine_{machine_id}/iv_curve.csv"')
     print(f'OUTPUT_CSV_IV_PROCESSED_PATH="Z:/data_scaps/csv/machine_{machine_id}/iv_curve_processed.csv"')
     print(f'OUTPUT_CSV_QE_PATH="Z:/data_scaps/csv/machine_{machine_id}/qe_curve.csv"')
+    print(f'CSV_DATASET_PATH="Z:/data_scaps/csv/machine_{machine_id}/dataset.csv"')
     print()
 
 # Note : les chemins ci-dessus sont volontairement IDENTIQUES sur les 40 PC

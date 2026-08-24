@@ -1,11 +1,11 @@
-from config import CSV_IV_PROCESSED_PATH, CSV_IV_PATH, CSV_QE_PATH
+from pipeline.config import CSV_IV_PROCESSED_PATH, CSV_IV_PATH, CSV_QE_PATH, CSV_DATASET_PATH
 import pandas as pd
-
+from outil.headers import qe_header
 import numpy as np
 from pathlib import Path
  
 # Chemins 
-OUTPUT_PATH  = Path("./csv/dataset.csv")
+OUTPUT_PATH  = Path(CSV_DATASET_PATH)
 OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
  
 # Colonnes utiles
@@ -35,6 +35,9 @@ iv_df = pd.read_csv(CSV_IV_PROCESSED_PATH)
  
 print(f"Lecture de {CSV_QE_PATH} …")
 qe_df = pd.read_csv(CSV_QE_PATH)
+
+header_str = qe_header()
+qe_df.columns = [col.strip() for col in header_str.split(',')]
  
 # Nettoyage : assurer les bons types pour les clés de jointure et de filtre
 for df in (iv_df, qe_df):
@@ -53,7 +56,7 @@ print(f"  QE  : {len(qe_df)} lignes")
 # On se base sur les paramètres présents dans iv_df (4 cas × N groupes)
 param_groups = iv_df[SHARED_KEYS].drop_duplicates().reset_index(drop=True)
 print(f"\n{len(param_groups)} groupe(s) de paramètres physiques détecté(s) :")
-print(param_groups.to_string(index=False))
+# print(param_groups.to_string(index=False))
  
 # Construction du dataset
 all_rows = []
@@ -90,11 +93,11 @@ for _, params in param_groups.iterrows():
         iv_rows = iv_df[mask_iv]
  
         if len(iv_rows) == 0:
-            print(f"  ⚠  Cas {case_name} introuvable dans IV pour {params.to_dict()} — ligne ignorée")
+            # print(f"  ⚠  Cas {case_name} introuvable dans IV pour {params.to_dict()} — ligne ignorée")
             valid = False
             break
-        if len(iv_rows) > 1:
-            print(f"  ⚠  Cas {case_name} : {len(iv_rows)} lignes IV trouvées (première utilisée)")
+        # if len(iv_rows) > 1:
+            # print(f"  ⚠  Cas {case_name} : {len(iv_rows)} lignes IV trouvées (première utilisée)")
  
         iv_row = iv_rows.iloc[0]
  
@@ -111,11 +114,11 @@ for _, params in param_groups.iterrows():
             qe_rows = qe_df[mask_qe]
  
             if len(qe_rows) == 0:
-                print(f"  ⚠  Cas {case_name} introuvable dans QE pour {params.to_dict()} — ligne ignorée")
+                # print(f"  ⚠  Cas {case_name} introuvable dans QE pour {params.to_dict()} — ligne ignorée")
                 valid = False
                 break
-            if len(qe_rows) > 1:
-                print(f"  ⚠  Cas {case_name} : {len(qe_rows)} lignes QE trouvées (première utilisée)")
+            # if len(qe_rows) > 1:
+                # print(f"  ⚠  Cas {case_name} : {len(qe_rows)} lignes QE trouvées (première utilisée)")
  
             qe_row = qe_rows.iloc[0]
             for col in QE_COLS:
