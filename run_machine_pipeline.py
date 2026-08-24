@@ -25,8 +25,8 @@ import sys
 import time
 
 STEPS = [
-    # ("1/3 - Génération SCAPS (IV/QE bruts)", [sys.executable, "-m", "pipeline.db_batch_generator_multimachine"]),
-    # ("2/3 - Interpolation IV (PCHIP, grille 85 points)", [sys.executable, "-m", "data_processing.data_process"]), #[sys.executable, "data_processing\data_process.py"]),
+    ("1/3 - Génération SCAPS (IV/QE bruts)", [sys.executable, "-m", "pipeline.db_batch_generator_multimachine"]),
+    ("2/3 - Interpolation IV (PCHIP, grille 85 points)", [sys.executable, "-m", "data_processing.data_process"]), #[sys.executable, "data_processing\data_process.py"]),
     ("3/3 - Agrégation dataset.csv (40 960 lignes attendues)", [sys.executable, "-m", "pipeline.dataset_generator.py"]),
 ]
 

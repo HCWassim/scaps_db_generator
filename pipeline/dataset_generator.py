@@ -93,11 +93,11 @@ for _, params in param_groups.iterrows():
         iv_rows = iv_df[mask_iv]
  
         if len(iv_rows) == 0:
-            # print(f"  ⚠  Cas {case_name} introuvable dans IV pour {params.to_dict()} — ligne ignorée")
+            print(f"  ⚠  Cas {case_name} introuvable dans IV pour {params.to_dict()} — ligne ignorée")
             valid = False
             break
-        # if len(iv_rows) > 1:
-            # print(f"  ⚠  Cas {case_name} : {len(iv_rows)} lignes IV trouvées (première utilisée)")
+        if len(iv_rows) > 1:
+            print(f"  ⚠  Cas {case_name} : {len(iv_rows)} lignes IV trouvées (première utilisée)")
  
         iv_row = iv_rows.iloc[0]
  
@@ -114,11 +114,11 @@ for _, params in param_groups.iterrows():
             qe_rows = qe_df[mask_qe]
  
             if len(qe_rows) == 0:
-                # print(f"  ⚠  Cas {case_name} introuvable dans QE pour {params.to_dict()} — ligne ignorée")
+                print(f"  ⚠  Cas {case_name} introuvable dans QE pour {params.to_dict()} — ligne ignorée")
                 valid = False
                 break
-            # if len(qe_rows) > 1:
-                # print(f"  ⚠  Cas {case_name} : {len(qe_rows)} lignes QE trouvées (première utilisée)")
+            if len(qe_rows) > 1:
+                print(f"  ⚠  Cas {case_name} : {len(qe_rows)} lignes QE trouvées (première utilisée)")
  
             qe_row = qe_rows.iloc[0]
             for col in QE_COLS:
