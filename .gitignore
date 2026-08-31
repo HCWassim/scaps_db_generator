@@ -1,7 +1,8 @@
 explication_git.txt
 .env
 __pycache__
-db_generation/csv/
+csv/
+parquet/
 .gitattributes
 .vscode
 .venv

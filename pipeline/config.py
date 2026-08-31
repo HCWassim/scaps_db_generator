@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 from outil.interval import split_interval, chunk_intervals, format_sci
 from itertools import product
-
 load_dotenv()
 
 # chemin scaps :
@@ -24,9 +23,10 @@ CSV_IV_PROCESSED_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_IV_PROCESSED_PATH"
 CSV_IV_NO_RS_RSH_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_IV_NO_RS_RSH_PATH"))
 CSV_QE_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_QE_PATH"))
 CSV_DATASET_PATH = os.path.abspath(os.getenv("CSV_DATASET_PATH"))
-print(f"CSV_QE_PATH: {CSV_QE_PATH}")
 CSV_DEF_PATH = os.path.abspath(os.getenv("OUTPUT_CSV_DEF_PATH"))
 SIMULATION_NAME = os.getenv("SIMULATION_FILENAME")
+CSV_DATASET_FINAL_PATH = os.path.abspath(os.getenv("CSV_DATASET_FINAL"))
+PARQUET_DATASET_FINAL_PATH = os.path.abspath(os.getenv("PARQUET_DATASET_FINAL"))
 
 # Création automatique des dossiers de sortie s'ils n'existent pas
 def _ensure_dir(path):
@@ -34,7 +34,7 @@ def _ensure_dir(path):
     if d:
         os.makedirs(d, exist_ok=True)
 
-for _p in (CSV_IV_PATH, CSV_IV_PROCESSED_PATH, CSV_IV_NO_RS_RSH_PATH, CSV_QE_PATH, CSV_DEF_PATH):
+for _p in (CSV_IV_PATH, CSV_IV_PROCESSED_PATH, CSV_IV_NO_RS_RSH_PATH, CSV_QE_PATH, CSV_DATASET_PATH, CSV_DEF_PATH, CSV_DATASET_FINAL_PATH, PARQUET_DATASET_FINAL_PATH):
     _ensure_dir(_p)
 
 CORE = os.cpu_count() or 4

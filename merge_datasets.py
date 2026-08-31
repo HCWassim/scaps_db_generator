@@ -29,7 +29,7 @@ import glob
 import os
 import pandas as pd
 
-SHARED_KEYS = ["Rs", "Rsh", "N_A", "N_t", "mu_h", "mu_n"]
+SHARED_KEYS = ["Rs", "Rsh", "N_A", "N_t", "mu_h", "mu_n", "Nt_interface"]
 EXPECTED_TOTAL_ROWS = 1_638_400
 EXPECTED_ROWS_PER_MACHINE = 40_960
 
